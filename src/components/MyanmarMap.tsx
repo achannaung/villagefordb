@@ -24,7 +24,7 @@ export function MyanmarMap({ filteredRecords, activeVillage, onSelectVillage }: 
   const tileLayerRef = useRef<L.TileLayer | null>(null);
 
   // Safe limit for rendering interactive markers cleanly
-  const RENDER_LIMIT = 2000;
+  const RENDER_LIMIT = 500;
   const validRecords = filteredRecords.filter((record) => {
     const lat = parseFloat(record.latitude);
     const lng = parseFloat(record.longitude);

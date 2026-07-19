@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { parseVillagesCSV } from "./csvParser";
 import { VillageRecord, Stats } from "./types";
 import { VirtualizedList } from "./components/VirtualizedList";
@@ -41,6 +41,56 @@ export interface SearchQuery {
   text: string;
   type: "township" | "villageEn" | "villageMm";
   timestamp: number;
+}
+
+interface ClickToCopyProps {
+  text: string;
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+  hoverBg?: string;
+  iconColor?: string;
+}
+
+function ClickToCopy({ 
+  text, 
+  label, 
+  children, 
+  className = "", 
+  hoverBg = "hover:bg-slate-100",
+  iconColor = "text-slate-400 group-hover:text-indigo-600"
+}: ClickToCopyProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <div
+      onClick={handleCopy}
+      className={`group relative inline-flex items-center gap-1.5 cursor-copy rounded px-1 -mx-1 transition-all ${hoverBg} ${className}`}
+      title={`Click to copy ${label}`}
+    >
+      <span className="truncate">{children}</span>
+      <span className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 flex items-center justify-center">
+        {copied ? (
+          <Check className="w-3 h-3 text-emerald-500 animate-pulse" />
+        ) : (
+          <Copy className={`w-3 h-3 ${iconColor}`} />
+        )}
+      </span>
+      {copied && (
+        <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-md pointer-events-none z-30 whitespace-nowrap animate-fade-in border border-slate-800">
+          Copied!
+        </span>
+      )}
+    </div>
+  );
 }
 
 export default function App() {
@@ -196,10 +246,13 @@ export default function App() {
         const csvText = await response.text();
         const parsed = parseVillagesCSV(csvText);
         
-        // Default sort is A-Z Village Name (Burmese) using Myanmar locale rules
-        // Doing this once on load ensures blazing-fast filters!
+        // Default sort is A-Z Village Name (Burmese) using highly optimized fast string operator comparison.
+        // Bypassing slow localeCompare for 70k elements allows the app to load instantly.
         const sorted = [...parsed].sort((a, b) => {
-          return (a.villageMm || "").localeCompare(b.villageMm || "", "my");
+          const valA = a.villageMm || "";
+          const valB = b.villageMm || "";
+          if (valA === valB) return 0;
+          return valA < valB ? -1 : 1;
         });
         
         setAllRecords(sorted);
@@ -280,6 +333,11 @@ export default function App() {
 
   // Main list filtering & sorting
   const filteredRecords = useMemo(() => {
+    const hasActiveSearch = !!(searchTownship.trim() || searchVillageEn.trim() || searchVillageMm.trim());
+    if (!hasActiveSearch && !selectedState) {
+      return [];
+    }
+
     let result = [...allRecords];
 
     // 1. Filter by State
@@ -326,13 +384,14 @@ export default function App() {
             }
           }
 
-          // Handle string comparison
+          // Handle string comparison (highly optimized fast operators instead of slow localeCompare)
           const strA = String(valA);
           const strB = String(valB);
 
+          if (strA === strB) return 0;
           return sortDirection === "asc" 
-            ? strA.localeCompare(strB) 
-            : strB.localeCompare(strA);
+            ? (strA < strB ? -1 : 1) 
+            : (strA > strB ? -1 : 1);
         });
       }
     }
@@ -1038,16 +1097,24 @@ Myanmar Pcode: ${village.srPcode}`;
                                         {item.villageTract}
                                       </div>
                                       <div className="text-xs font-bold text-slate-900 truncate pr-2">
-                                        {highlightMatch(item.village, searchVillageEn)}
+                                        <ClickToCopy text={item.village} label="English Village Name">
+                                          {highlightMatch(item.village, searchVillageEn)}
+                                        </ClickToCopy>
                                       </div>
                                       <div className="text-sm font-display font-medium text-slate-900 truncate pr-2">
-                                        {highlightMatch(item.villageMm || "—", searchVillageMm)}
+                                        <ClickToCopy text={item.villageMm || ""} label="Burmese Village Name">
+                                          {highlightMatch(item.villageMm || "—", searchVillageMm)}
+                                        </ClickToCopy>
                                       </div>
                                       <div className="text-xs font-mono text-slate-500 truncate pr-2">
-                                        {item.latitude}
+                                        <ClickToCopy text={item.latitude} label="Latitude">
+                                          {item.latitude}
+                                        </ClickToCopy>
                                       </div>
                                       <div className="text-xs font-mono text-slate-500 truncate pr-2">
-                                        {item.longitude}
+                                        <ClickToCopy text={item.longitude} label="Longitude">
+                                          {item.longitude}
+                                        </ClickToCopy>
                                       </div>
                                       <div className="text-xs text-slate-400 truncate pr-2">
                                         {item.source}
@@ -1072,10 +1139,14 @@ Myanmar Pcode: ${village.srPcode}`;
                                       {/* Village names row */}
                                       <div className="flex items-baseline gap-2.5">
                                         <h3 className="font-semibold text-sm text-slate-900 truncate">
-                                          {highlightMatch(item.village, searchVillageEn)}
+                                          <ClickToCopy text={item.village} label="English Village Name">
+                                            {highlightMatch(item.village, searchVillageEn)}
+                                          </ClickToCopy>
                                         </h3>
                                         <span className="text-xs text-slate-500 font-bold font-display tracking-wide">
-                                          {highlightMatch(item.villageMm || "—", searchVillageMm)}
+                                          <ClickToCopy text={item.villageMm || ""} label="Burmese Village Name">
+                                            {highlightMatch(item.villageMm || "—", searchVillageMm)}
+                                          </ClickToCopy>
                                         </span>
                                       </div>
 
@@ -1090,9 +1161,15 @@ Myanmar Pcode: ${village.srPcode}`;
                                     <div className="flex items-center gap-3 shrink-0 ml-4">
                                       <div className="text-right hidden sm:block">
                                         <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider font-mono">Coordinates</p>
-                                        <p className="text-xs font-mono text-slate-600 mt-0.5">
-                                          {item.latitude}, {item.longitude}
-                                        </p>
+                                        <div className="text-xs font-mono text-slate-600 mt-0.5 flex items-center gap-1 justify-end">
+                                          <ClickToCopy text={item.latitude} label="Latitude">
+                                            {item.latitude}
+                                          </ClickToCopy>
+                                          <span className="text-slate-300">,</span>
+                                          <ClickToCopy text={item.longitude} label="Longitude">
+                                            {item.longitude}
+                                          </ClickToCopy>
+                                        </div>
                                       </div>
                                       <div className={`p-2 rounded-lg transition-colors ${
                                         isActive ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
@@ -1130,10 +1207,14 @@ Myanmar Pcode: ${village.srPcode}`;
                           Village Details
                         </span>
                         <h2 className="text-lg font-bold text-slate-900 mt-2 font-display">
-                          {activeVillage.village}
+                          <ClickToCopy text={activeVillage.village} label="English Village Name">
+                            {activeVillage.village}
+                          </ClickToCopy>
                         </h2>
                         <h3 className="text-sm font-semibold text-slate-600 mt-0.5">
-                          {activeVillage.villageMm}
+                          <ClickToCopy text={activeVillage.villageMm || ""} label="Burmese Village Name">
+                            {activeVillage.villageMm}
+                          </ClickToCopy>
                         </h3>
                       </div>
                       <button
@@ -1161,13 +1242,27 @@ Myanmar Pcode: ${village.srPcode}`;
                         <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                           <span className="text-slate-400 text-xs">Latitude:</span>
                           <span className="text-sm font-semibold text-indigo-300 tracking-wide select-all">
-                            {activeVillage.latitude}
+                            <ClickToCopy 
+                              text={activeVillage.latitude} 
+                              label="Latitude"
+                              hoverBg="hover:bg-slate-800"
+                              iconColor="text-indigo-400 group-hover:text-indigo-300"
+                            >
+                              {activeVillage.latitude}
+                            </ClickToCopy>
                           </span>
                         </div>
                         <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                           <span className="text-slate-400 text-xs">Longitude:</span>
                           <span className="text-sm font-semibold text-indigo-300 tracking-wide select-all">
-                            {activeVillage.longitude}
+                            <ClickToCopy 
+                              text={activeVillage.longitude} 
+                              label="Longitude"
+                              hoverBg="hover:bg-slate-800"
+                              iconColor="text-indigo-400 group-hover:text-indigo-300"
+                            >
+                              {activeVillage.longitude}
+                            </ClickToCopy>
                           </span>
                         </div>
                       </div>
