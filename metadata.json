@@ -1,0 +1,6 @@
+{
+  "name": "Village Name Finder",
+  "description": "A high-performance interactive village finder and coordinate locator for townships, featuring virtualized listings and instant search.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
