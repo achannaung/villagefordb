@@ -56,6 +56,46 @@ export default function App() {
   const [searchVillageMm, setSearchVillageMm] = useState<string>("");
   const [sortField, setSortField] = useState<keyof VillageRecord | "default">("villageMm");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  // Immediate Keyboard Input States (for fluid typing at 60 FPS without filtering overhead on every keystroke)
+  const [inputTownship, setInputTownship] = useState<string>("");
+  const [inputVillageEn, setInputVillageEn] = useState<string>("");
+  const [inputVillageMm, setInputVillageMm] = useState<string>("");
+  
+  // Sync back local inputs when the parent filter states change from external sources (such as clicking Recent Searches or pressing 'Esc')
+  useEffect(() => {
+    setInputTownship(searchTownship);
+  }, [searchTownship]);
+
+  useEffect(() => {
+    setInputVillageEn(searchVillageEn);
+  }, [searchVillageEn]);
+
+  useEffect(() => {
+    setInputVillageMm(searchVillageMm);
+  }, [searchVillageMm]);
+
+  // Debounce actual search-filtering state updates (250ms delay) to keep typing responsive
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTownship(inputTownship);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [inputTownship]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchVillageEn(inputVillageEn);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [inputVillageEn]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchVillageMm(inputVillageMm);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [inputVillageMm]);
   
   // UI States
   const [activeVillage, setActiveVillage] = useState<VillageRecord | null>(null);
@@ -186,8 +226,11 @@ export default function App() {
       // Clear filters with 'Escape'
       if (e.key === "Escape") {
         setSearchTownship("");
+        setInputTownship("");
         setSearchVillageEn("");
+        setInputVillageEn("");
         setSearchVillageMm("");
+        setInputVillageMm("");
         setSelectedState("");
         setActiveVillage(null);
         showToast("Search and filters cleared");
@@ -264,34 +307,34 @@ export default function App() {
 
     // 5. Dynamic Sort
     if (sortField && sortField !== "default") {
-      result.sort((a, b) => {
-        const valA = a[sortField] || "";
-        const valB = b[sortField] || "";
+      if (sortField === "villageMm") {
+        if (sortDirection === "desc") {
+          result.reverse();
+        }
+        // If sortDirection is "asc", it's already pre-sorted on mount, so we do nothing!
+      } else {
+        result.sort((a, b) => {
+          const valA = a[sortField] || "";
+          const valB = b[sortField] || "";
 
-        // Handle numeric values for coordinates
-        if (sortField === "latitude" || sortField === "longitude") {
-          const numA = parseFloat(valA);
-          const numB = parseFloat(valB);
-          if (!isNaN(numA) && !isNaN(numB)) {
-            return sortDirection === "asc" ? numA - numB : numB - numA;
+          // Handle numeric values for coordinates
+          if (sortField === "latitude" || sortField === "longitude") {
+            const numA = parseFloat(valA);
+            const numB = parseFloat(valB);
+            if (!isNaN(numA) && !isNaN(numB)) {
+              return sortDirection === "asc" ? numA - numB : numB - numA;
+            }
           }
-        }
 
-        // Handle string comparison
-        const strA = String(valA);
-        const strB = String(valB);
-        
-        // Use Burmese locale rules if sorting Burmese names
-        if (sortField === "villageMm") {
+          // Handle string comparison
+          const strA = String(valA);
+          const strB = String(valB);
+
           return sortDirection === "asc" 
-            ? strA.localeCompare(strB, "my") 
-            : strB.localeCompare(strA, "my");
-        }
-
-        return sortDirection === "asc" 
-          ? strA.localeCompare(strB) 
-          : strB.localeCompare(strA);
-      });
+            ? strA.localeCompare(strB) 
+            : strB.localeCompare(strA);
+        });
+      }
     }
 
     return result;
@@ -616,19 +659,24 @@ Myanmar Pcode: ${village.srPcode}`;
                           ref={searchTownshipRef}
                           type="text"
                           placeholder="Search Township..."
-                          value={searchTownship}
-                          onChange={(e) => setSearchTownship(e.target.value)}
-                          onBlur={(e) => addRecentSearch(e.target.value, "township")}
+                          value={inputTownship}
+                          onChange={(e) => setInputTownship(e.target.value)}
+                          onBlur={(e) => {
+                            setSearchTownship(e.target.value);
+                            addRecentSearch(e.target.value, "township");
+                          }}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
-                              addRecentSearch((e.target as HTMLInputElement).value, "township");
+                              const val = (e.target as HTMLInputElement).value;
+                              setSearchTownship(val);
+                              addRecentSearch(val, "township");
                             }
                           }}
                           className="w-full px-3 pr-8 py-2.5 bg-white border border-slate-300 rounded-xl text-xs placeholder:text-slate-400 shadow-2xs focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
                         />
-                        {searchTownship ? (
+                        {inputTownship ? (
                           <button
-                            onClick={() => setSearchTownship("")}
+                            onClick={() => { setInputTownship(""); setSearchTownship(""); }}
                             className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 text-slate-400 transition cursor-pointer"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -650,19 +698,24 @@ Myanmar Pcode: ${village.srPcode}`;
                         <input
                           type="text"
                           placeholder="Search English Name..."
-                          value={searchVillageEn}
-                          onChange={(e) => setSearchVillageEn(e.target.value)}
-                          onBlur={(e) => addRecentSearch(e.target.value, "villageEn")}
+                          value={inputVillageEn}
+                          onChange={(e) => setInputVillageEn(e.target.value)}
+                          onBlur={(e) => {
+                            setSearchVillageEn(e.target.value);
+                            addRecentSearch(e.target.value, "villageEn");
+                          }}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
-                              addRecentSearch((e.target as HTMLInputElement).value, "villageEn");
+                              const val = (e.target as HTMLInputElement).value;
+                              setSearchVillageEn(val);
+                              addRecentSearch(val, "villageEn");
                             }
                           }}
                           className="w-full px-3 pr-8 py-2.5 bg-white border border-slate-300 rounded-xl text-xs placeholder:text-slate-400 shadow-2xs focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
                         />
-                        {searchVillageEn && (
+                        {inputVillageEn && (
                           <button
-                            onClick={() => setSearchVillageEn("")}
+                            onClick={() => { setInputVillageEn(""); setSearchVillageEn(""); }}
                             className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 text-slate-400 transition cursor-pointer"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -680,19 +733,24 @@ Myanmar Pcode: ${village.srPcode}`;
                         <input
                           type="text"
                           placeholder="Search Burmese Name..."
-                          value={searchVillageMm}
-                          onChange={(e) => setSearchVillageMm(e.target.value)}
-                          onBlur={(e) => addRecentSearch(e.target.value, "villageMm")}
+                          value={inputVillageMm}
+                          onChange={(e) => setInputVillageMm(e.target.value)}
+                          onBlur={(e) => {
+                            setSearchVillageMm(e.target.value);
+                            addRecentSearch(e.target.value, "villageMm");
+                          }}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
-                              addRecentSearch((e.target as HTMLInputElement).value, "villageMm");
+                              const val = (e.target as HTMLInputElement).value;
+                              setSearchVillageMm(val);
+                              addRecentSearch(val, "villageMm");
                             }
                           }}
                           className="w-full px-3 pr-8 py-2.5 bg-white border border-slate-300 rounded-xl text-xs placeholder:text-slate-400 shadow-2xs focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold font-display"
                         />
-                        {searchVillageMm && (
+                        {inputVillageMm && (
                           <button
-                            onClick={() => setSearchVillageMm("")}
+                            onClick={() => { setInputVillageMm(""); setSearchVillageMm(""); }}
                             className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 text-slate-400 transition cursor-pointer"
                           >
                             <X className="w-3.5 h-3.5" />
