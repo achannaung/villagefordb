@@ -8,6 +8,7 @@ import { parseVillagesCSV } from "./csvParser";
 import { VillageRecord, Stats } from "./types";
 import { VirtualizedList } from "./components/VirtualizedList";
 import { MyanmarMap } from "./components/MyanmarMap";
+import { DebouncedSearchInput } from "./components/DebouncedSearchInput";
 import { 
   Search, 
   X, 
@@ -107,46 +108,6 @@ export default function App() {
   const [sortField, setSortField] = useState<keyof VillageRecord | "default">("villageMm");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  // Immediate Keyboard Input States (for fluid typing at 60 FPS without filtering overhead on every keystroke)
-  const [inputTownship, setInputTownship] = useState<string>("");
-  const [inputVillageEn, setInputVillageEn] = useState<string>("");
-  const [inputVillageMm, setInputVillageMm] = useState<string>("");
-  
-  // Sync back local inputs when the parent filter states change from external sources (such as clicking Recent Searches or pressing 'Esc')
-  useEffect(() => {
-    setInputTownship(searchTownship);
-  }, [searchTownship]);
-
-  useEffect(() => {
-    setInputVillageEn(searchVillageEn);
-  }, [searchVillageEn]);
-
-  useEffect(() => {
-    setInputVillageMm(searchVillageMm);
-  }, [searchVillageMm]);
-
-  // Debounce actual search-filtering state updates (250ms delay) to keep typing responsive
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchTownship(inputTownship);
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [inputTownship]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchVillageEn(inputVillageEn);
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [inputVillageEn]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchVillageMm(inputVillageMm);
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [inputVillageMm]);
-  
   // UI States
   const [activeVillage, setActiveVillage] = useState<VillageRecord | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "list" | "map">("table");
@@ -279,11 +240,8 @@ export default function App() {
       // Clear filters with 'Escape'
       if (e.key === "Escape") {
         setSearchTownship("");
-        setInputTownship("");
         setSearchVillageEn("");
-        setInputVillageEn("");
         setSearchVillageMm("");
-        setInputVillageMm("");
         setSelectedState("");
         setActiveVillage(null);
         showToast("Search and filters cleared");
@@ -709,114 +667,37 @@ Myanmar Pcode: ${village.srPcode}`;
                   {/* Three Dedicated Search Inputs */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {/* Township Search Input */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                        Township
-                      </label>
-                      <div className="relative">
-                        <input
-                          ref={searchTownshipRef}
-                          type="text"
-                          placeholder="Search Township..."
-                          value={inputTownship}
-                          onChange={(e) => setInputTownship(e.target.value)}
-                          onBlur={(e) => {
-                            setSearchTownship(e.target.value);
-                            addRecentSearch(e.target.value, "township");
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              const val = (e.target as HTMLInputElement).value;
-                              setSearchTownship(val);
-                              addRecentSearch(val, "township");
-                            }
-                          }}
-                          className="w-full px-3 pr-8 py-2.5 bg-white border border-slate-300 rounded-xl text-xs placeholder:text-slate-400 shadow-2xs focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
-                        />
-                        {inputTownship ? (
-                          <button
-                            onClick={() => { setInputTownship(""); setSearchTownship(""); }}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 text-slate-400 transition cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        ) : (
-                          <kbd className="hidden sm:inline-flex absolute right-2.5 top-1/2 -translate-y-1/2 items-center px-1.5 py-0.5 bg-slate-100 border border-slate-200 text-[10px] font-semibold text-slate-400 rounded font-mono">
-                            /
-                          </kbd>
-                        )}
-                      </div>
-                    </div>
+                    <DebouncedSearchInput
+                      inputRef={searchTownshipRef}
+                      label="Township"
+                      placeholder="Search Township..."
+                      value={searchTownship}
+                      onChange={(val) => setSearchTownship(val)}
+                      onEnter={(val) => addRecentSearch(val, "township")}
+                      className="w-full px-3 pr-8 py-2.5 bg-white border border-slate-300 rounded-xl text-xs placeholder:text-slate-400 shadow-2xs focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
+                      showKbd={true}
+                    />
 
                     {/* Village EN Search Input */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                        Village (EN)
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="Search English Name..."
-                          value={inputVillageEn}
-                          onChange={(e) => setInputVillageEn(e.target.value)}
-                          onBlur={(e) => {
-                            setSearchVillageEn(e.target.value);
-                            addRecentSearch(e.target.value, "villageEn");
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              const val = (e.target as HTMLInputElement).value;
-                              setSearchVillageEn(val);
-                              addRecentSearch(val, "villageEn");
-                            }
-                          }}
-                          className="w-full px-3 pr-8 py-2.5 bg-white border border-slate-300 rounded-xl text-xs placeholder:text-slate-400 shadow-2xs focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
-                        />
-                        {inputVillageEn && (
-                          <button
-                            onClick={() => { setInputVillageEn(""); setSearchVillageEn(""); }}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 text-slate-400 transition cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                    <DebouncedSearchInput
+                      label="Village (EN)"
+                      placeholder="Search English Name..."
+                      value={searchVillageEn}
+                      onChange={(val) => setSearchVillageEn(val)}
+                      onEnter={(val) => addRecentSearch(val, "villageEn")}
+                      className="w-full px-3 pr-8 py-2.5 bg-white border border-slate-300 rounded-xl text-xs placeholder:text-slate-400 shadow-2xs focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold"
+                    />
 
                     {/* Village MM Search Input */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 font-display">
-                        Village (MM)
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="Search Burmese Name..."
-                          value={inputVillageMm}
-                          onChange={(e) => setInputVillageMm(e.target.value)}
-                          onBlur={(e) => {
-                            setSearchVillageMm(e.target.value);
-                            addRecentSearch(e.target.value, "villageMm");
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              const val = (e.target as HTMLInputElement).value;
-                              setSearchVillageMm(val);
-                              addRecentSearch(val, "villageMm");
-                            }
-                          }}
-                          className="w-full px-3 pr-8 py-2.5 bg-white border border-slate-300 rounded-xl text-xs placeholder:text-slate-400 shadow-2xs focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold font-display"
-                        />
-                        {inputVillageMm && (
-                          <button
-                            onClick={() => { setInputVillageMm(""); setSearchVillageMm(""); }}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 text-slate-400 transition cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                    <DebouncedSearchInput
+                      label="Village (MM)"
+                      labelClassName="text-indigo-600 font-display"
+                      placeholder="Search Burmese Name..."
+                      value={searchVillageMm}
+                      onChange={(val) => setSearchVillageMm(val)}
+                      onEnter={(val) => addRecentSearch(val, "villageMm")}
+                      className="w-full px-3 pr-8 py-2.5 bg-white border border-slate-300 rounded-xl text-xs placeholder:text-slate-400 shadow-2xs focus:outline-hidden focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all font-semibold font-display"
+                    />
                   </div>
 
                   {/* Filter tags & Sorting option */}
