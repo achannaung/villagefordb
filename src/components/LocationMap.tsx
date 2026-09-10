@@ -22,20 +22,11 @@ interface LocationMapProps {
   stateEn: string;
 }
 
-// Fixed 8-decimal format: truncate (never round), pad with zeros when shorter.
-// e.g. 95.3609313964844 -> "95.36093139", 16.16144 -> "16.16144000"
+// Round to 8 decimals, trailing zeros stripped (no zero-padding).
+// e.g. 95.3609313964844 -> "95.3609314", 16.16144 -> "16.16144"
 function formatCoord(val: number): string {
-  if (!Number.isFinite(val)) return '0.00000000';
-  const s = String(val);
-  if (s.includes('e') || s.includes('E')) {
-    const t = Math.trunc(val * 1e8) / 1e8;
-    return t.toFixed(8);
-  }
-  const dot = s.indexOf('.');
-  if (dot === -1) return `${s}.00000000`;
-  const int = s.slice(0, dot);
-  const dec = (s.slice(dot + 1) + '00000000').slice(0, 8);
-  return `${int}.${dec}`;
+  if (!Number.isFinite(val)) return '0';
+  return String(parseFloat(val.toFixed(8)));
 }
 
 // Convert Decimal Degrees to Degrees Minutes Seconds
