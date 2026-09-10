@@ -5,91 +5,91 @@
    "stateEn": "Ayeyarwady Region",
    "file": "data/ayeyarwady-region.json",
    "count": 12700,
-   "bytes": 1698726
+   "bytes": 1698723
   },
   {
    "stateEn": "Bago Region",
    "file": "data/bago-region.json",
    "count": 6711,
-   "bytes": 897306
+   "bytes": 897378
   },
   {
    "stateEn": "Chin State",
    "file": "data/chin-state.json",
    "count": 1504,
-   "bytes": 173916
+   "bytes": 173891
   },
   {
    "stateEn": "Kachin State",
    "file": "data/kachin-state.json",
    "count": 3163,
-   "bytes": 378164
+   "bytes": 378180
   },
   {
    "stateEn": "Kayah State",
    "file": "data/kayah-state.json",
    "count": 716,
-   "bytes": 86575
+   "bytes": 86576
   },
   {
    "stateEn": "Kayin State",
    "file": "data/kayin-state.json",
    "count": 2156,
-   "bytes": 273024
+   "bytes": 273047
   },
   {
    "stateEn": "Magway Region",
    "file": "data/magway-region.json",
    "count": 4906,
-   "bytes": 613704
+   "bytes": 613674
   },
   {
    "stateEn": "Mandalay Region",
    "file": "data/mandalay-region.json",
    "count": 4974,
-   "bytes": 650763
+   "bytes": 650795
   },
   {
    "stateEn": "Mon State",
    "file": "data/mon-state.json",
    "count": 1301,
-   "bytes": 157896
+   "bytes": 157878
   },
   {
    "stateEn": "Naypyidaw Union Territory",
    "file": "data/naypyidaw-union-territory.json",
    "count": 916,
-   "bytes": 124050
+   "bytes": 124073
   },
   {
    "stateEn": "Rakhine State",
    "file": "data/rakhine-state.json",
    "count": 4203,
-   "bytes": 559646
+   "bytes": 559587
   },
   {
    "stateEn": "Sagaing Region",
    "file": "data/sagaing-region.json",
    "count": 6535,
-   "bytes": 817543
+   "bytes": 817533
   },
   {
    "stateEn": "Shan State",
    "file": "data/shan-state.json",
    "count": 18941,
-   "bytes": 2431618
+   "bytes": 2431640
   },
   {
    "stateEn": "Tanintharyi Region",
    "file": "data/tanintharyi-region.json",
    "count": 1325,
-   "bytes": 170497
+   "bytes": 170494
   },
   {
    "stateEn": "Yangon Region",
    "file": "data/yangon-region.json",
    "count": 2262,
-   "bytes": 301234
+   "bytes": 301232
   }
  ]
 }

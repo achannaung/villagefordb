@@ -20,9 +20,16 @@ const CANON = {
 };
 
 const slug = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-const round8 = (v) => {
-  const n = parseFloat(v);
-  return Number.isFinite(n) ? Math.round(n * 1e7) / 1e7 : 0;
+const trunc8 = (raw) => {
+  const s = String(raw || '').trim();
+  if (!s.includes('.')) {
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : 0;
+  }
+  const [i, d = ''] = s.split('.');
+  const dec = (d.replace(/[^0-9]/g, '') + '00000000').slice(0, 8);
+  const n = parseFloat(`${i}.${dec}`);
+  return Number.isFinite(n) ? n : 0;
 };
 
 function parseLine(line) {
@@ -68,7 +75,7 @@ async function main() {
     let state = CANON[srRaw.toLowerCase().trim()];
     if (!state) state = TOWNSHIP_STATE[tw.toLowerCase().trim()] || srRaw || 'Unknown';
     if (!groups.has(state)) groups.set(state, []);
-    groups.get(state).push([tw, tract, ven, vmm, round8(lat), round8(lng), dist, srRaw, pcode, src]);
+    groups.get(state).push([tw, tract, ven, vmm, trunc8(lat), trunc8(lng), dist, srRaw, pcode, src]);
     const k = state + '||' + tw;
     towns.set(k, (towns.get(k) || 0) + 1);
   }
