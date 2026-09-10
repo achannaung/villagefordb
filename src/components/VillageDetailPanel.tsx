@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { Village, FlaggedVillage, MonitorNote } from '../types';
+import { Village, MonitorNote } from '../types';
 const LocationMap = React.lazy(() => import('./LocationMap'));
 import {
   X,
@@ -17,9 +17,7 @@ import {
 interface VillageDetailPanelProps {
   village: Village | null;
   onClose: () => void;
-  flaggedState: FlaggedVillage | undefined;
   noteState: MonitorNote | undefined;
-  onUpdateStatus: (villageId: string, status: FlaggedVillage['status']) => void;
   onUpdateNote: (villageId: string, note: string) => void;
 }
 
@@ -89,7 +87,7 @@ Source: ${village.source}`;
               <Activity size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white font-serif">Village Details</h3>
+              <h3 className="text-lg font-bold text-white font-display">Village Details</h3>
               <p className="text-xs text-slate-400 font-mono">P-Code: {village.pcode}</p>
             </div>
           </div>
@@ -107,7 +105,7 @@ Source: ${village.source}`;
           {/* Main Titles */}
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-3xl font-extrabold text-white font-serif tracking-tight">{village.nameMm}</h1>
+              <h1 className="text-3xl font-extrabold text-white font-display tracking-tight">{village.nameMm}</h1>
               <span className="text-lg font-medium text-slate-400 font-sans">/ {village.nameEn}</span>
             </div>
             <div className="flex items-center gap-1 text-xs text-slate-400 font-sans flex-wrap">
@@ -122,7 +120,7 @@ Source: ${village.source}`;
           {/* P-Code & Source */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-slate-900/20 border border-slate-800/80 rounded-xl p-3.5">
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">GAD P-Code</span>
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">GAD P-Code</span>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-sm text-indigo-300 font-bold">{village.pcode}</span>
                 <button
@@ -136,14 +134,14 @@ Source: ${village.source}`;
             </div>
 
             <div className="bg-slate-900/20 border border-slate-800/80 rounded-xl p-3.5">
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Data Source</span>
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Data Source</span>
               <span className="font-mono text-sm text-slate-300 block font-bold">{village.source}</span>
             </div>
           </div>
 
           {/* Village Tract */}
           <div className="bg-slate-900/20 border border-slate-800/80 rounded-xl p-3.5">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">Village Tract</span>
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Village Tract</span>
             <div className="flex items-center gap-1.5 text-sm text-slate-200 font-medium">
               <MapPin size={14} className="text-indigo-400 shrink-0" />
               <span className="truncate">{village.tractEn}</span>
@@ -151,7 +149,7 @@ Source: ${village.source}`;
           </div>
 
           {/* Geographic Map (lazy: Leaflet loads only on open) */}
-          <Suspense fallback={<div className="bg-slate-900/40 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-500">Loading map…</div>}>
+          <Suspense fallback={<div className="bg-slate-900/40 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-400">Loading map…</div>}>
             <LocationMap
               latitude={village.latitude}
               longitude={village.longitude}
@@ -195,7 +193,7 @@ Source: ${village.source}`;
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               placeholder="Record field observations about this village here…"
-              className="w-full glass-input rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 resize-none"
+              className="w-full glass-input rounded-xl px-4 py-3 text-sm text-white placeholder-slate-400 resize-none"
             />
             <div className="flex items-center justify-end">
               <button
@@ -217,7 +215,7 @@ Source: ${village.source}`;
             </div>
           </form>
 
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 justify-center pt-1">
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 justify-center pt-1">
             <Database size={11} />
             <span>GAD Coordinate Database Registry</span>
           </div>

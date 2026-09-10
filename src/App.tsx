@@ -1,33 +1,15 @@
 import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { MOCK_VILLAGES } from './data/villages';
-import { Village, FlaggedVillage, MonitorNote } from './types';
+import { Village, MonitorNote } from './types';
 import FilterBar from './components/FilterBar';
 import VillageTable from './components/VillageTable';
-import { Database, Search, CheckCircle2, SlidersHorizontal, Loader2, Wifi, AlertTriangle, Moon, Sun } from 'lucide-react';
+import { Database, Search, CheckCircle2, SlidersHorizontal, Loader2, Wifi, AlertTriangle } from 'lucide-react';
 import { getManifest, getTownshipIndex, loadRelevantStates } from './utils/dataLoader';
 import type { TownshipEntry } from './utils/dataLoader';
 
 const VillageDetailPanel = React.lazy(() => import('./components/VillageDetailPanel'));
 
 export default function App() {
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    try {
-      return (localStorage.getItem('villagefinder_theme') as 'dark' | 'light') || 'dark';
-    } catch {
-      return 'dark';
-    }
-  });
-
-  useEffect(() => {
-    if (theme === 'light') document.body.classList.add('light-mode');
-    else document.body.classList.remove('light-mode');
-    try {
-      localStorage.setItem('villagefinder_theme', theme);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [theme]);
-
   // Dataset state — starts with tiny fallback, loads real data only on demand
   const [allVillages, setAllVillages] = useState<Village[]>(MOCK_VILLAGES);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -46,15 +28,6 @@ export default function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
   const townshipInputRef = useRef<HTMLInputElement | null>(null);
-
-  const [flaggedStates, setFlaggedStates] = useState<Record<string, FlaggedVillage>>(() => {
-    try {
-      const saved = localStorage.getItem('villagefinder_flags');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
 
   const [noteStates, setNoteStates] = useState<Record<string, MonitorNote>>(() => {
     try {
@@ -85,14 +58,6 @@ export default function App() {
       cancelled = true;
     };
   }, []);
-
-  const handleUpdateStatus = (villageId: string, status: FlaggedVillage['status']) => {
-    const updated = { ...flaggedStates, [villageId]: { villageId, flaggedAt: new Date().toISOString(), status } };
-    setFlaggedStates(updated);
-    try {
-      localStorage.setItem('villagefinder_flags', JSON.stringify(updated));
-    } catch {}
-  };
 
   const handleUpdateNote = (villageId: string, note: string) => {
     const updated = { ...noteStates, [villageId]: { villageId, note, updatedAt: new Date().toISOString() } };
@@ -280,21 +245,11 @@ export default function App() {
   return (
     <div className="min-h-screen py-10 px-4 md:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex justify-end items-center mb-2">
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold tracking-wide transition cursor-pointer bg-slate-950/80 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-900 shadow-xl"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          >
-            {theme === 'dark' ? (<><Sun size={13} className="text-amber-400" /><span>Light Mode</span></>) : (<><Moon size={13} className="text-indigo-400" /><span>Dark Mode</span></>)}
-          </button>
-        </div>
-
         <header id="header-section" className="text-center space-y-3 py-6 relative">
           <div className="mx-auto w-16 h-16 bg-white/5 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center mb-2 shadow-2xl">
             <Database className="text-indigo-400" size={32} />
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white font-serif tracking-tight drop-shadow-lg">Village Finder</h1>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white font-display tracking-tight drop-shadow-lg">Village Finder</h1>
           <p className="text-sm md:text-base text-slate-300 font-sans uppercase tracking-[0.2em] font-semibold max-w-md mx-auto">
             GAD Coordinate Database • <span className="text-indigo-300 font-extrabold">ACA</span>
           </p>
@@ -378,7 +333,7 @@ export default function App() {
               <Database size={24} className="absolute text-indigo-400 animate-bounce" />
             </div>
             <div>
-              <h4 className="text-lg font-bold text-white font-serif">{loadProgress || 'Searching…'}</h4>
+              <h4 className="text-lg font-bold text-white font-display">{loadProgress || 'Searching…'}</h4>
               <p className="text-xs text-slate-400 mt-1">Loading only matching datasets…</p>
             </div>
           </div>
@@ -386,11 +341,11 @@ export default function App() {
           <div id="search-placeholder" className="glass-panel rounded-2xl p-12 sm:p-16 text-center shadow-2xl border border-slate-800 flex flex-col items-center justify-center gap-6">
             <div className="p-4 bg-indigo-500/10 rounded-full text-indigo-400 border border-indigo-500/20 shadow-inner animate-bounce"><Search size={36} /></div>
             <div className="max-w-md mx-auto space-y-2">
-              <h4 className="text-xl font-bold text-white font-serif">GAD Village Search</h4>
+              <h4 className="text-xl font-bold text-white font-display">GAD Village Search</h4>
               <p className="text-sm text-slate-400 leading-relaxed">Select a State/Region or enter a Township/Village name and click <strong className="text-indigo-400 font-semibold">Search</strong>.</p>
             </div>
             <div className="flex flex-col items-center gap-3 max-w-lg">
-              <span className="text-xs text-slate-500 font-medium select-none">Or click a shortcut:</span>
+              <span className="text-xs text-slate-400 font-medium select-none">Or click a shortcut:</span>
               <div className="flex flex-wrap justify-center gap-2">
                 {['Ayeyarwady Region', 'Shan State'].map((s) => (
                   <button key={s} onClick={() => { setSelectedState(s); setTownshipQuery(''); setVillageQuery(''); setVillageEnQuery(''); runSearch(s, '', '', ''); }}
@@ -402,7 +357,7 @@ export default function App() {
             </div>
             {recentSearches.length > 0 && (
               <div className="flex flex-col items-center gap-3 max-w-lg">
-                <span className="text-xs text-slate-500 font-medium select-none">Recent searches:</span>
+                <span className="text-xs text-slate-400 font-medium select-none">Recent searches:</span>
                 <div className="flex flex-wrap justify-center gap-2">
                   {recentSearches.map((r, i) => (
                     <button key={i} onClick={() => applyRecent(r)} title="Repeat this search"
@@ -415,13 +370,13 @@ export default function App() {
             )}
           </div>
         ) : (
-          <VillageTable villages={filteredVillages} flaggedStates={flaggedStates} onSelectVillage={setSelectedVillage} onCopyAllPCodes={handleCopyAllPCodes} pcodeCopied={pcodeCopied} onExportCSV={handleExportCSV} />
+          <VillageTable villages={filteredVillages} onSelectVillage={setSelectedVillage} onCopyAllPCodes={handleCopyAllPCodes} pcodeCopied={pcodeCopied} onExportCSV={handleExportCSV} />
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
           <div id="about-card" className="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
-            <h3 className="text-xl font-bold text-white font-serif mb-4 flex items-center gap-2"><CheckCircle2 size={18} className="text-indigo-400" /><span>About This Tool</span></h3>
+            <h3 className="text-xl font-bold text-white font-display mb-4 flex items-center gap-2"><CheckCircle2 size={18} className="text-indigo-400" /><span>About This Tool</span></h3>
             <div className="space-y-4 text-slate-300 text-sm leading-relaxed">
               <p className="flex gap-3"><span className="text-indigo-400 font-bold text-lg select-none">♦</span><span>Search {totalRecords.toLocaleString()} villages with precise GAD coordinates across Myanmar.</span></p>
               <p className="flex gap-3"><span className="text-indigo-400 font-bold text-lg select-none">♦</span><span>Data is split by state for instant loading, with real P-Codes, tracts, districts and sources.</span></p>
@@ -430,7 +385,7 @@ export default function App() {
           </div>
           <div id="features-card" className="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
-            <h3 className="text-xl font-bold text-white font-serif mb-4 flex items-center gap-2"><SlidersHorizontal size={18} className="text-indigo-400" /><span>Key Features</span></h3>
+            <h3 className="text-xl font-bold text-white font-display mb-4 flex items-center gap-2"><SlidersHorizontal size={18} className="text-indigo-400" /><span>Key Features</span></h3>
             <ul className="space-y-3 text-slate-300 text-sm">
               <li className="flex items-start gap-3"><span className="text-emerald-400 font-bold mt-0.5 select-none">✔</span><div><strong className="text-white">Instant State-split Loading:</strong><p className="text-xs text-slate-400 mt-0.5">Only matching state files load. No full 8.5MB download on open.</p></div></li>
               <li className="flex items-start gap-3"><span className="text-emerald-400 font-bold mt-0.5 select-none">✔</span><div><strong className="text-white">Autocomplete + Recent:</strong><p className="text-xs text-slate-400 mt-0.5">Type-ahead suggestions and one-click repeat searches.</p></div></li>
@@ -440,10 +395,10 @@ export default function App() {
           </div>
         </div>
 
-        <footer id="footer-section" className="text-center py-10 text-xs text-slate-500 border-t border-slate-800/60 mt-12 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="font-serif">ACA© 2026 Village Finder • GAD Coordinate Database |</p>
+        <footer id="footer-section" className="text-center py-10 text-xs text-slate-400 border-t border-slate-800/60 mt-12 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="font-display">ACA© 2026 Village Finder • GAD Coordinate Database |</p>
           <div className="flex items-center gap-4 text-slate-400">
-            <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-500 border border-slate-700/30">v1.0-Pro</span>
+            <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400 border border-slate-700/30">v1.0-Pro</span>
             <span>GAD Conformant</span>
           </div>
         </footer>
@@ -451,9 +406,8 @@ export default function App() {
         {selectedVillage && (
           <Suspense fallback={null}>
             <VillageDetailPanel village={selectedVillage} onClose={() => setSelectedVillage(null)}
-              flaggedState={selectedVillage ? flaggedStates[selectedVillage.id] : undefined}
               noteState={selectedVillage ? noteStates[selectedVillage.id] : undefined}
-              onUpdateStatus={handleUpdateStatus} onUpdateNote={handleUpdateNote} />
+              onUpdateNote={handleUpdateNote} />
           </Suspense>
         )}
       </div>

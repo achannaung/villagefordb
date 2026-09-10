@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Village, FlaggedVillage } from '../types';
+import { Village } from '../types';
 import { 
   ArrowUpDown, 
   ArrowUp, 
@@ -16,7 +16,6 @@ import {
 
 interface VillageTableProps {
   villages: Village[];
-  flaggedStates: Record<string, FlaggedVillage>;
   onSelectVillage: (village: Village) => void;
   onCopyAllPCodes: () => void;
   pcodeCopied: boolean;
@@ -27,7 +26,6 @@ type SortField = 'nameMm' | 'nameEn' | 'townshipEn' | 'stateEn' | 'pcode';
 
 export default function VillageTable({
   villages,
-  flaggedStates,
   onSelectVillage,
   onCopyAllPCodes,
   pcodeCopied,
@@ -65,7 +63,7 @@ export default function VillageTable({
 
   const getSortIndicator = (field: SortField) => {
     if (sortField !== field) {
-      return <ArrowUpDown size={14} className="sort-indicator text-slate-500 hover:text-slate-300 transition-colors" />;
+      return <ArrowUpDown size={14} className="sort-indicator text-slate-400 hover:text-slate-300 transition-colors" />;
     }
     return sortDirection === 'asc' 
       ? <ArrowUp size={14} className="sort-indicator text-indigo-400" />
@@ -140,51 +138,13 @@ export default function VillageTable({
     return pages;
   };
 
-  // Helper for status badge style
-  const getStatusBadge = (villageId: string) => {
-    const flag = flaggedStates[villageId];
-    if (!flag) return null;
-
-    switch (flag.status) {
-      case 'monitored':
-        return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            Monitored
-          </span>
-        );
-      case 'alert':
-        return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-            Alert
-          </span>
-        );
-      case 'inactive':
-        return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-300 border border-slate-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-            Inactive
-          </span>
-        );
-      case 'pending':
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            Pending
-          </span>
-        );
-    }
-  };
-
   return (
     <div id="table-container" className="glass-panel rounded-2xl shadow-2xl overflow-hidden mb-8 border border-slate-800">
       {/* Table Action Bar */}
       <div className="px-6 py-4 bg-slate-900/40 border-b border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-white font-serif">Village Registry</h3>
-          <p className="text-xs text-slate-400 mt-0.5">Click column headers to sort. Click a row to view monitor panel.</p>
+          <h3 className="text-lg font-semibold text-white font-display">Village Registry</h3>
+          <p className="text-xs text-slate-400 mt-0.5">Click column headers to sort. Click a row to view full details.</p>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
@@ -223,10 +183,10 @@ export default function VillageTable({
       <div className="overflow-x-auto max-h-[550px]">
         {villages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-slate-800/60 flex items-center justify-center text-slate-500 mb-4 border border-slate-700/50">
+            <div className="w-16 h-16 rounded-full bg-slate-800/60 flex items-center justify-center text-slate-400 mb-4 border border-slate-700/50">
               <Sparkles size={28} />
             </div>
-            <h4 className="text-lg font-semibold text-white font-serif">No Villages Matched</h4>
+            <h4 className="text-lg font-semibold text-white font-display">No Villages Matched</h4>
             <p className="text-sm text-slate-400 max-w-md mt-1">
               No records found matching your active search criteria. Try selecting another state, refining the township spelling, or clearing parameters.
             </p>
@@ -289,7 +249,7 @@ export default function VillageTable({
                   {/* Township */}
                   <td className="px-3 py-3 sm:px-6 sm:py-3.5 text-slate-300 font-sans text-xs sm:text-sm">
                     <span className="font-medium">{village.townshipEn}</span>
-                    <span className="text-slate-500 text-xs block mt-0.5">{village.townshipMm}</span>
+                    <span className="text-slate-400 text-xs block mt-0.5">{village.townshipMm}</span>
                   </td>
 
                   {/* English Name */}
@@ -305,7 +265,7 @@ export default function VillageTable({
                       {copiedVillageId === village.id ? (
                         <Check size={12} className="text-emerald-400 shrink-0" />
                       ) : (
-                        <Copy size={12} className="text-slate-500 opacity-0 group-hover/copy:opacity-100 transition-opacity shrink-0" />
+                        <Copy size={12} className="text-slate-400 opacity-0 group-hover/copy:opacity-100 transition-opacity shrink-0" />
                       )}
                     </div>
                   </td>
@@ -373,7 +333,7 @@ export default function VillageTable({
             {getPageNumbers().map((page, index) => {
               if (page === '...') {
                 return (
-                  <span key={`dots-${index}`} className="px-2 text-slate-500 font-semibold select-none text-xs">
+                  <span key={`dots-${index}`} className="px-2 text-slate-400 font-semibold select-none text-xs">
                     ...
                   </span>
                 );

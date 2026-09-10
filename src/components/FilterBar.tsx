@@ -59,7 +59,7 @@ export default function FilterBar({
           <SlidersHorizontal size={20} id="filter-icon" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-white font-serif">Search & Filter</h2>
+          <h2 className="text-xl font-semibold tracking-tight text-white font-display">Search & Filter</h2>
           <p className="text-xs text-slate-400">Refine the database by state, township, or village name</p>
         </div>
       </div>
@@ -145,7 +145,7 @@ export default function FilterBar({
       </div>
 
       <div className="mt-6 pt-5 border-t border-slate-800/60 flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400">
           <span className="flex items-center gap-1.5"><kbd className="font-mono bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-slate-300">/</kbd> focus township</span>
           <span className="flex items-center gap-1.5"><kbd className="font-mono bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-slate-300">Enter</kbd> search</span>
           <span className="flex items-center gap-1.5"><kbd className="font-mono bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-slate-300">Esc</kbd> clear</span>

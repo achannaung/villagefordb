@@ -239,12 +239,12 @@ export default function LocationMap({
       {/* Main Coordinate Display Panel */}
       <div className="p-4 bg-slate-950/20 grid grid-cols-2 gap-4 border-b border-slate-800/40">
         <div className="space-y-1 bg-slate-950/40 border border-slate-900 rounded-xl p-3">
-          <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Latitude (Y)</span>
+          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Latitude (Y)</span>
           <div className="text-sm font-extrabold text-white font-mono tracking-tight">{dispLat}°</div>
           <div className="text-[11px] text-indigo-300 font-mono">{dmsLat}</div>
         </div>
         <div className="space-y-1 bg-slate-950/40 border border-slate-900 rounded-xl p-3">
-          <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Longitude (X)</span>
+          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Longitude (X)</span>
           <div className="text-sm font-extrabold text-white font-mono tracking-tight">{dispLng}°</div>
           <div className="text-[11px] text-cyan-300 font-mono">{dmsLng}</div>
         </div>
@@ -303,7 +303,7 @@ export default function LocationMap({
         <div className="absolute bottom-3 right-3 z-10 bg-slate-950/90 border border-slate-800/80 text-[10px] px-2.5 py-1 rounded-lg shadow-xl flex items-center gap-1.5 backdrop-blur-sm pointer-events-none" style={{ zIndex: 1000 }}>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold text-slate-200">{villageName}</span>
-          <span className="text-slate-500 font-mono">Zoom: {mapZoom}</span>
+          <span className="text-slate-400 font-mono">Zoom: {mapZoom}</span>
         </div>
 
         {/* Tile-blocked fallback notice (no API key needed by these providers,
@@ -317,7 +317,7 @@ export default function LocationMap({
       </div>
 
       {/* Metadata Footer bar */}
-      <div className="px-4 py-2 bg-slate-950/40 border-t border-slate-800/40 text-[10px] text-slate-500 flex justify-between items-center">
+      <div className="px-4 py-2 bg-slate-950/40 border-t border-slate-800/40 text-[10px] text-slate-400 flex justify-between items-center">
         <span className="flex items-center gap-1">
           <Globe size={11} className="text-slate-600" />
           <span>Regional Context: {townshipEn} • {stateEn}</span>

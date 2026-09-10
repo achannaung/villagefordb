@@ -121,7 +121,7 @@ export default function AutocompleteInput({
         }}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="w-full glass-input rounded-xl pl-4 pr-10 py-3 text-white placeholder-slate-500"
+        className="w-full glass-input rounded-xl pl-4 pr-10 py-3 text-white placeholder-slate-400"
       />
       {value && (
         <button
@@ -157,7 +157,7 @@ export default function AutocompleteInput({
               >
                 <span className="truncate font-medium">{m.value}</span>
                 {m.hint && (
-                  <span className="text-[11px] text-slate-500 truncate shrink-0">{m.hint}</span>
+                  <span className="text-[11px] text-slate-400 truncate shrink-0">{m.hint}</span>
                 )}
               </button>
             </li>

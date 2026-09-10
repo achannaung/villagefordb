@@ -1,21 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-serif: "Inter", system-ui, -apple-system, sans-serif;
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
-/* Custom CSS to implement the professional and formal styling */
+/* Single dark theme — professional GIS console look */
+:root {
+  color-scheme: dark;
+}
+
 body {
   font-family: var(--font-sans);
   background: #0b0f19; /* Deep Professional Slate */
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, rgba(15, 23, 42, 0.9) 0, transparent 40%),
     radial-gradient(at 50% 0%, rgba(30, 41, 59, 0.5) 0, transparent 55%),
     radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.9) 0, transparent 40%);
   min-height: 100vh;
   color: #f1f5f9;
   overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.4);
+  color: #fff;
+}
+
+/* Visible keyboard focus for accessibility */
+:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Custom scrollbar for a cleaner look */
@@ -97,11 +115,6 @@ select option {
   box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.35);
   position: relative;
   z-index: 10;
-}
-
-body.light-mode .glass-table-row:hover {
-  background: rgba(15, 23, 42, 0.02) !important;
-  box-shadow: 0 6px 16px -5px rgba(15, 23, 42, 0.08) !important;
 }
 
 /* Global brand mappings from indigo to elegant corporate blue */
@@ -208,133 +221,13 @@ body.light-mode .glass-table-row:hover {
   transition: all 0.3s ease;
 }
 
-/* Light Mode Overrides for Professional and Formal Style */
-body.light-mode {
-  background: #f8fafc; /* slate-50 */
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(226, 232, 240, 0.4) 0, transparent 40%),
-    radial-gradient(at 50% 0%, rgba(203, 213, 225, 0.3) 0, transparent 55%),
-    radial-gradient(at 100% 0%, rgba(226, 232, 240, 0.4) 0, transparent 40%);
-  color: #0f172a; /* slate-900 */
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
-
-/* Base text color overrides */
-body.light-mode .text-white {
-  color: #0f172a !important; /* slate-900 */
-}
-body.light-mode .text-slate-100 {
-  color: #1e293b !important; /* slate-800 */
-}
-body.light-mode .text-slate-200 {
-  color: #1e293b !important; /* slate-800 */
-}
-body.light-mode .text-slate-300 {
-  color: #334155 !important; /* slate-700 */
-}
-body.light-mode .text-slate-400 {
-  color: #475569 !important; /* slate-600 */
-}
-body.light-mode .text-slate-500 {
-  color: #64748b !important; /* slate-500 */
-}
-
-/* Panel and card overrides */
-body.light-mode .glass-panel {
-  background: rgba(255, 255, 255, 0.85) !important;
-  border-color: rgba(148, 163, 184, 0.25) !important;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.05) !important;
-}
-
-body.light-mode .glass-card {
-  background: rgba(255, 255, 255, 0.65) !important;
-  border-color: rgba(148, 163, 184, 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
-}
-
-body.light-mode .glass-card:hover {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(59, 130, 246, 0.35) !important;
-  box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.12) !important;
-}
-
-body.light-mode .glass-input {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(148, 163, 184, 0.3) !important;
-  color: #0f172a !important;
-}
-
-body.light-mode .glass-input:focus {
-  background: #ffffff !important;
-  border-color: rgba(59, 130, 246, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
-}
-
-/* Specific component element overrides */
-body.light-mode .bg-slate-950\/80,
-body.light-mode .bg-slate-950\/40,
-body.light-mode .bg-slate-900\/40,
-body.light-mode .bg-slate-950\/20,
-body.light-mode .bg-slate-900\/20,
-body.light-mode .bg-slate-900\/60,
-body.light-mode .bg-slate-900\/10 {
-  background-color: rgba(241, 245, 249, 0.8) !important;
-}
-
-body.light-mode .border-slate-800,
-body.light-mode .border-slate-800\/60,
-body.light-mode .border-slate-800\/80,
-body.light-mode .border-slate-700,
-body.light-mode .border-slate-700\/80,
-body.light-mode .border-slate-900 {
-  border-color: rgba(148, 163, 184, 0.2) !important;
-}
-
-body.light-mode tr.hover\:bg-slate-900\/20:hover {
-  background-color: rgba(241, 245, 249, 0.9) !important;
-}
-
-body.light-mode td {
-  border-bottom-color: rgba(148, 163, 184, 0.12) !important;
-}
-
-body.light-mode .bg-slate-950 {
-  background-color: #f1f5f9 !important;
-}
-
-body.light-mode .text-indigo-400 {
-  color: #1d4ed8 !important; /* Richer dark blue */
-}
-
-body.light-mode .text-indigo-300 {
-  color: #2563eb !important;
-}
-
-body.light-mode .border-indigo-500\/20 {
-  border-color: rgba(37, 99, 235, 0.2) !important;
-}
-
-body.light-mode .bg-indigo-500\/10 {
-  background-color: rgba(37, 99, 235, 0.08) !important;
-}
-
-body.light-mode .bg-indigo-500\/20 {
-  background-color: rgba(37, 99, 235, 0.15) !important;
-}
-
-body.light-mode .leaflet-container {
-  background-color: #f1f5f9 !important;
-}
-
-body.light-mode .leaflet-control-scale {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(148, 163, 184, 0.4) !important;
-  color: #475569 !important;
-}
-
-body.light-mode .leaflet-control-scale-line {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(148, 163, 184, 0.4) !important;
-  color: #1e293b !important;
-}
-
-

@@ -22,9 +22,3 @@ export interface MonitorNote {
   note: string;
   updatedAt: string;
 }
-
-export interface FlaggedVillage {
-  villageId: string;
-  flaggedAt: string;
-  status: 'pending' | 'monitored' | 'alert' | 'inactive';
-}
