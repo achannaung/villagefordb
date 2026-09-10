@@ -1,20 +1,25 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Village Finder — GAD Coordinate Database
 
-# Run and deploy your AI Studio app
+Fast Myanmar village lookup across **72,313 GAD records** with precise coordinates.
 
-This contains everything you need to run your app locally.
+## Why fast
 
-View your app in AI Studio: https://ai.studio/apps/464855da-60eb-464e-bf60-e67796012f7c
+- The 8.5MB national CSV is **split by state** into `public/data/*.json` at build time
+- Page opens with only a ~20KB index (`manifest.json` + `townships.json`)
+- Each search loads **only the matching state file(s)** (100KB–2.4MB), cached afterwards
+- Memoized filtering/sorting, lazy-loaded map, code-split vendor chunks
 
-## Run Locally
+## Run locally
 
-**Prerequisites:**  Node.js
+Requires Node.js.
 
+```bash
+npm install
+npm run dev        # prebuild regenerates public/data if missing, then vite build
+npm run build
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Data
+
+Source: GAD coordinate database (`SR_Pcode, SR, District, Township, Village_Tract,
+Village, Village_MM, Latitude, Longitude, Source`), rebuilt via `scripts/prebuild.mjs`.

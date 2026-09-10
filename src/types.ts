@@ -1,24 +1,28 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-export interface VillageRecord {
-  srPcode: string;
-  sr: string;            // State / Region (e.g. Ayeyarwady)
-  district: string;      // District (e.g. Pyapon)
-  township: string;      // Township (e.g. Bogale)
-  villageTract: string;  // Village Tract
-  village: string;       // Village (English)
-  villageMm: string;     // Village (Burmese)
-  latitude: string;      // Latitude coordinate in original string form
-  longitude: string;     // Longitude coordinate in original string form
-  source: string;        // Source GAD or other
+export interface Village {
+  id: string;
+  pcode: string;          // Real GAD P-Code, e.g. MMR017
+  nameMm: string;         // Burmese name
+  nameEn: string;         // English name
+  tractMm: string;        // Village Tract (Burmese label)
+  tractEn: string;        // Village Tract (English)
+  townshipMm: string;
+  townshipEn: string;
+  stateMm: string;
+  stateEn: string;
+  districtEn: string;
+  latitude: number;
+  longitude: number;
+  source: string;         // GAD / Field Sources / ...
 }
 
-export interface Stats {
-  totalVillages: number;
-  totalTownships: number;
-  totalDistricts: number;
-  totalStates: number;
+export interface MonitorNote {
+  villageId: string;
+  note: string;
+  updatedAt: string;
+}
+
+export interface FlaggedVillage {
+  villageId: string;
+  flaggedAt: string;
+  status: 'pending' | 'monitored' | 'alert' | 'inactive';
 }
