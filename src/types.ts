@@ -12,6 +12,8 @@ export interface Village {
   districtEn: string;
   latitude: number;
   longitude: number;
+  latDisplay: string;     // Original precision for display/copy (e.g. "95.36093140")
+  lngDisplay: string;
   source: string;         // GAD / Field Sources / ...
 }
 

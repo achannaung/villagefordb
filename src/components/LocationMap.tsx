@@ -17,6 +17,8 @@ import {
 interface LocationMapProps {
   latitude: number;
   longitude: number;
+  latDisplay?: string;
+  lngDisplay?: string;
   villageName: string;
   townshipEn: string;
   stateEn: string;
@@ -43,6 +45,8 @@ function toDMS(val: number, isLat: boolean): string {
 export default function LocationMap({
   latitude,
   longitude,
+  latDisplay,
+  lngDisplay,
   villageName,
   townshipEn,
   stateEn,
@@ -61,10 +65,15 @@ export default function LocationMap({
   const dmsLat = useMemo(() => toDMS(latitude, true), [latitude]);
   const dmsLng = useMemo(() => toDMS(longitude, false), [longitude]);
 
-  // Smart coordinate format: keep original digits as-is when <= 8 decimals,
-  // trim to 8 when longer (no forced trailing zeros).
-  const dispLat = useMemo(() => formatCoord(latitude), [latitude]);
-  const dispLng = useMemo(() => formatCoord(longitude), [longitude]);
+  // Display strings preserve original precision (fallback: format numbers)
+  const dispLat = useMemo(
+    () => latDisplay || formatCoord(latitude),
+    [latDisplay, latitude]
+  );
+  const dispLng = useMemo(
+    () => lngDisplay || formatCoord(longitude),
+    [lngDisplay, longitude]
+  );
 
   // Copy Lat, Lng to Clipboard
   const copyCoordinates = () => {

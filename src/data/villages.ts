@@ -34,6 +34,8 @@ export const MOCK_VILLAGES: Village[] = [
     districtEn: 'Pyapon',
     latitude: 16.18943,
     longitude: 95.36093,
+    latDisplay: '16.18943',
+    lngDisplay: '95.36093',
     source: 'GAD',
   },
   {
@@ -50,6 +52,8 @@ export const MOCK_VILLAGES: Village[] = [
     districtEn: 'Pyapon',
     latitude: 16.20003,
     longitude: 95.35284,
+    latDisplay: '16.20003',
+    lngDisplay: '95.35284',
     source: 'GAD',
   },
   {
@@ -66,6 +70,8 @@ export const MOCK_VILLAGES: Village[] = [
     districtEn: 'Pyapon',
     latitude: 16.16144,
     longitude: 95.31829,
+    latDisplay: '16.16144',
+    lngDisplay: '95.31829',
     source: 'Field Sources',
   },
 ];

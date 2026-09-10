@@ -58,8 +58,9 @@ export async function getTownshipIndex(base = ''): Promise<TownshipEntry[]> {
   return townshipCache;
 }
 
-// Compact rows: [tw, tract, ven, vmm, lat, lng, dist, sr, pcode, src]
-type CompactRow = [string, string, string, string, number, number, string, string, string, string];
+// Compact rows: [tw, tract, ven, vmm, lat, lng, dist, sr, pcode, src, latT, lngT]
+// latT/lngT are display-ready strings preserving original precision (max 8).
+type CompactRow = [string, string, string, string, number, number, string, string, string, string, string, string];
 
 interface CompactFile {
   state: string;
@@ -69,7 +70,7 @@ interface CompactFile {
 }
 
 function toVillage(stateEn: string, idx: number, r: CompactRow): Village {
-  const [tw, tract, ven, vmm, lat, lng, dist, , pcode, src] = r;
+  const [tw, tract, ven, vmm, lat, lng, dist, , pcode, src, latT, lngT] = r;
   return {
     id: `v-${stateSlug(stateEn)}-${idx}`,
     pcode: pcode || '—',
@@ -84,6 +85,8 @@ function toVillage(stateEn: string, idx: number, r: CompactRow): Village {
     districtEn: dist || '—',
     latitude: lat || 0,
     longitude: lng || 0,
+    latDisplay: latT || String(lat || 0),
+    lngDisplay: lngT || String(lng || 0),
     source: src || '—',
   };
 }

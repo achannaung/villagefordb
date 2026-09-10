@@ -20,9 +20,18 @@ const CANON = {
 };
 
 const slug = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-const round8 = (raw) => {
-  const n = parseFloat(raw);
-  return Number.isFinite(n) ? Math.round(n * 1e8) / 1e8 : 0;
+const num = (s) => {
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : 0;
+};
+// Display-ready string: round to min(original decimals, 8), keep trailing zeros.
+const fmt8 = (raw) => {
+  const s = String(raw || '').trim();
+  if (!s.includes('.')) return s || '0';
+  const [i, dRaw] = s.split('.');
+  const d = dRaw.replace(/[^0-9]/g, '');
+  if (d.length <= 8) return d ? `${i}.${d}` : i;
+  return (Math.round(num(s) * 1e8) / 1e8).toFixed(8);
 };
 
 function parseLine(line) {
@@ -68,7 +77,8 @@ async function main() {
     let state = CANON[srRaw.toLowerCase().trim()];
     if (!state) state = TOWNSHIP_STATE[tw.toLowerCase().trim()] || srRaw || 'Unknown';
     if (!groups.has(state)) groups.set(state, []);
-    groups.get(state).push([tw, tract, ven, vmm, round8(lat), round8(lng), dist, srRaw, pcode, src]);
+    const la = fmt8(lat), ln = fmt8(lng);
+    groups.get(state).push([tw, tract, ven, vmm, num(la), num(ln), dist, srRaw, pcode, src, la, ln]);
     const k = state + '||' + tw;
     towns.set(k, (towns.get(k) || 0) + 1);
   }
@@ -76,7 +86,7 @@ async function main() {
   for (const [state, rows] of groups) {
     const fn = slug(state) + '.json';
     const fp = path.join(OUT, fn);
-    fs.writeFileSync(fp, JSON.stringify({ state, count: rows.length, fields: ['tw', 'tract', 'ven', 'vmm', 'lat', 'lng', 'dist', 'sr', 'pcode', 'src'], rows }));
+    fs.writeFileSync(fp, JSON.stringify({ state, count: rows.length, fields: ['tw', 'tract', 'ven', 'vmm', 'lat', 'lng', 'dist', 'sr', 'pcode', 'src', 'latT', 'lngT'], rows }));
     manifest.push({ stateEn: state, file: 'data/' + fn, count: rows.length, bytes: fs.statSync(fp).size });
   }
   const total = [...groups.values()].reduce((a, r) => a + r.length, 0);

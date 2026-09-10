@@ -155,6 +155,8 @@ Source: ${village.source}`;
             <LocationMap
               latitude={village.latitude}
               longitude={village.longitude}
+              latDisplay={village.latDisplay}
+              lngDisplay={village.lngDisplay}
               villageName={village.nameEn}
               townshipEn={village.townshipEn}
               stateEn={village.stateEn}
