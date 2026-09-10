@@ -20,7 +20,7 @@ const CANON = {
 };
 
 const slug = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-const round7 = (v) => {
+const round8 = (v) => {
   const n = parseFloat(v);
   return Number.isFinite(n) ? Math.round(n * 1e7) / 1e7 : 0;
 };
@@ -39,7 +39,7 @@ function parseLine(line) {
 }
 
 // Township → state fallback for rows with an empty SR (e.g. Bokpyin → Tanintharyi)
-const TOWNSHIP_STATE = { 'bokpyin': 'Tanintharyi Region' };
+const TOWNSHIP_STATE = { 'bokpyin': 'Tanintharyi Region', 'kawthoung': 'Tanintharyi Region' };
 
 async function main() {
   fs.mkdirSync(OUT, { recursive: true });
@@ -68,7 +68,7 @@ async function main() {
     let state = CANON[srRaw.toLowerCase().trim()];
     if (!state) state = TOWNSHIP_STATE[tw.toLowerCase().trim()] || srRaw || 'Unknown';
     if (!groups.has(state)) groups.set(state, []);
-    groups.get(state).push([tw, tract, ven, vmm, round7(lat), round7(lng), dist, srRaw, pcode, src]);
+    groups.get(state).push([tw, tract, ven, vmm, round8(lat), round8(lng), dist, srRaw, pcode, src]);
     const k = state + '||' + tw;
     towns.set(k, (towns.get(k) || 0) + 1);
   }
