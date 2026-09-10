@@ -56,7 +56,7 @@ export default function LocationMap({
 
   // Copy Lat, Lng to Clipboard
   const copyCoordinates = () => {
-    navigator.clipboard.writeText(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+    navigator.clipboard.writeText(`${latitude.toFixed(8)}, ${longitude.toFixed(8)}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -219,12 +219,12 @@ export default function LocationMap({
       <div className="p-4 bg-slate-950/20 grid grid-cols-2 gap-4 border-b border-slate-800/40">
         <div className="space-y-1 bg-slate-950/40 border border-slate-900 rounded-xl p-3">
           <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Latitude (Y)</span>
-          <div className="text-sm font-extrabold text-white font-mono tracking-tight">{latitude.toFixed(6)}°</div>
+          <div className="text-sm font-extrabold text-white font-mono tracking-tight">{latitude.toFixed(8)}°</div>
           <div className="text-[11px] text-indigo-300 font-mono">{dmsLat}</div>
         </div>
         <div className="space-y-1 bg-slate-950/40 border border-slate-900 rounded-xl p-3">
           <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Longitude (X)</span>
-          <div className="text-sm font-extrabold text-white font-mono tracking-tight">{longitude.toFixed(6)}°</div>
+          <div className="text-sm font-extrabold text-white font-mono tracking-tight">{longitude.toFixed(8)}°</div>
           <div className="text-[11px] text-cyan-300 font-mono">{dmsLng}</div>
         </div>
       </div>
