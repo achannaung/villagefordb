@@ -62,6 +62,7 @@ export default function LocationMap({
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const layerStyleRef = useRef<typeof mapStyle>('dark');
 
