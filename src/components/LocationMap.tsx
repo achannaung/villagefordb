@@ -62,8 +62,8 @@ export default function LocationMap({
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const overlayRef = useRef<L.TileLayer | null>(null);
   const layerStyleRef = useRef<typeof mapStyle>('street');
 
   const dmsLat = useMemo(() => toDMS(latitude, true), [latitude]);
@@ -92,6 +92,8 @@ export default function LocationMap({
     street: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     sat: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   } as const;
+  // Transparent place-label overlay (boundaries + town names) shown on top of satellite
+  const SAT_LABELS_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}';
   const STYLE_LABEL: Record<typeof mapStyle, string> = { street: 'Street', sat: 'Satellite' };
   const STYLE_ATTR: Record<typeof mapStyle, string> = {
     street: '© OpenStreetMap contributors',
@@ -140,6 +142,19 @@ export default function LocationMap({
     });
     tileLayerRef.current = tiles;
     layerStyleRef.current = style;
+    // Satellite gets place labels (towns/boundaries) + the marker always shows the village name
+    if (overlayRef.current) {
+      map.removeLayer(overlayRef.current);
+      overlayRef.current = null;
+    }
+    if (style === 'sat') {
+      overlayRef.current = L.tileLayer(SAT_LABELS_URL, {
+        maxZoom: 19,
+        maxNativeZoom: 19,
+        opacity: 1,
+        zIndex: 2,
+      }).addTo(map);
+    }
   };
 
   // 1. Initialize Leaflet Map once on mount
@@ -191,9 +206,10 @@ export default function LocationMap({
       addLayer(map, mapStyle);
     }
 
-    // Update or create custom marker
+    // Update or create custom marker (name tag always visible, incl. satellite)
     if (markerRef.current) {
       markerRef.current.setLatLng([latitude, longitude]);
+      markerRef.current.setTooltipContent(villageName);
     } else {
       const markerHtml = `
         <div class="relative flex items-center justify-center">
@@ -213,6 +229,13 @@ export default function LocationMap({
       });
 
       const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map);
+      marker.bindTooltip(villageName, {
+        permanent: true,
+        direction: 'top',
+        offset: [0, -20],
+        opacity: 1,
+        className: 'village-name-tip',
+      });
       markerRef.current = marker;
     }
   }, [latitude, longitude, mapStyle]);
