@@ -140,6 +140,7 @@ export default function LocationMap({
 
     // Dark Esri layer default (no API key required)
     addLayer(map, 'dark');
+    mapRef.current = map;
 
     // Scale Control
     L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
