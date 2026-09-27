@@ -4,11 +4,22 @@ import { MYANMAR_STATES_REGIONS } from './data/villages';
 import { Village, MonitorNote } from './types';
 import FilterBar from './components/FilterBar';
 import VillageTable from './components/VillageTable';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Database, Search, CheckCircle2, SlidersHorizontal, Loader2, Wifi, AlertTriangle } from 'lucide-react';
 import { getManifest, getTownshipIndex, loadRelevantStates } from './utils/dataLoader';
 import type { TownshipEntry } from './utils/dataLoader';
 
-const VillageDetailPanel = React.lazy(() => import('./components/VillageDetailPanel'));
+const VillageDetailPanel = React.lazy(
+  (() => {
+    // Retry code-split chunk loads (flaky networks) before giving up
+    const load = (attempt: number): Promise<{ default: React.ComponentType<any> }> =>
+      import('./components/VillageDetailPanel').catch((err) => {
+        if (attempt >= 2) throw err;
+        return new Promise<never>((resolve) => setTimeout(resolve, 800)).then(() => load(attempt + 1));
+      });
+    return () => load(0);
+  })()
+);
 
 export default function App() {
   // Dataset state — starts with tiny fallback, loads real data only on demand
@@ -496,11 +507,22 @@ export default function App() {
         </footer>
 
         {selectedVillage && (
-          <Suspense fallback={null}>
-            <VillageDetailPanel village={selectedVillage} onClose={() => setSelectedVillage(null)}
-              noteState={selectedVillage ? noteStates[selectedVillage.id] : undefined}
-              onUpdateNote={handleUpdateNote} />
-          </Suspense>
+          <ErrorBoundary resetKey={selectedVillage.id} onReset={() => setSelectedVillage(null)}>
+            <Suspense
+              fallback={
+                <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/70 backdrop-blur-sm">
+                  <div className="relative w-full max-w-lg h-full glass-panel border-l border-slate-800 shadow-2xl flex flex-col items-center justify-center gap-3 z-10">
+                    <div className="w-10 h-10 rounded-full border-4 border-indigo-500/20 border-t-indigo-400 animate-spin"></div>
+                    <span className="text-xs text-slate-400 font-medium">Opening details…</span>
+                  </div>
+                </div>
+              }
+            >
+              <VillageDetailPanel village={selectedVillage} onClose={() => setSelectedVillage(null)}
+                noteState={selectedVillage ? noteStates[selectedVillage.id] : undefined}
+                onUpdateNote={handleUpdateNote} />
+            </Suspense>
+          </ErrorBoundary>
         )}
       </div>
     </div>

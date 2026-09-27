@@ -261,9 +261,13 @@ export default function VillageTable({
             </thead>
             <tbody className="divide-y divide-slate-800/50">
               {paginatedVillages.map((village) => (
-                <tr 
-                  key={village.id} 
+                <tr
+                  key={village.id}
                   onClick={() => onSelectVillage(village)}
+                  onMouseEnter={() => {
+                    // Preload the details chunk so Eye opens instantly, even on slow networks
+                    void import('./VillageDetailPanel');
+                  }}
                   className="glass-table-row hover:bg-slate-800/30 cursor-pointer transition text-sm group"
                 >
                   {/* State / Region */}
