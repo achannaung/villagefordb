@@ -55,7 +55,10 @@ export default function LocationMap({
   const [mapStyle, setMapStyle] = useState<'dark' | 'street' | 'sat'>('dark');
   const [mapZoom, setMapZoom] = useState(12);
   const [tilesFailed, setTilesFailed] = useState(false);
+  const [mapLoading, setMapLoading] = useState(true);
   const tileErrorCount = useRef(0);
+  const tilesLoadedCount = useRef(0);
+  const loadTimer = useRef<number | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -101,14 +104,24 @@ export default function LocationMap({
   // upscales (overzoom) instead of showing "data not available" placeholder tiles.
   const STYLE_NATIVE_ZOOM: Record<typeof mapStyle, number> = { dark: 16, street: 19, sat: 18 };
 
-  // (Re)create the tile layer for a style, with missing-tile fallback notice
+  // (Re)create the tile layer for a style, with loading + fallback handling
   const addLayer = (map: L.Map, style: typeof mapStyle) => {
     if (tileLayerRef.current) {
       map.removeLayer(tileLayerRef.current);
       tileLayerRef.current = null;
     }
     tileErrorCount.current = 0;
+    tilesLoadedCount.current = 0;
     setTilesFailed(false);
+    setMapLoading(true);
+    // If nothing loads within 8s (blocked/slow network), say so instead of staying black
+    if (loadTimer.current) window.clearTimeout(loadTimer.current);
+    loadTimer.current = window.setTimeout(() => {
+      if (tilesLoadedCount.current === 0) {
+        setTilesFailed(true);
+        setMapLoading(false);
+      }
+    }, 8000);
     const tiles = L.tileLayer(TILE_URLS[style], {
       maxZoom: 19,
       maxNativeZoom: STYLE_NATIVE_ZOOM[style],
@@ -116,11 +129,17 @@ export default function LocationMap({
     // If the network blocks tiles, show a fallback notice instead of a broken map
     tiles.on('tileerror', () => {
       tileErrorCount.current += 1;
-      if (tileErrorCount.current >= 8) setTilesFailed(true);
+      if (tileErrorCount.current >= 8) {
+        setTilesFailed(true);
+        setMapLoading(false);
+      }
     });
     tiles.on('tileload', () => {
       tileErrorCount.current = 0;
-      setTilesFailed(false);
+      tilesLoadedCount.current += 1;
+      // Guarded updates: avoid a re-render storm (one per tile otherwise)
+      setMapLoading((prev) => (prev ? false : prev));
+      setTilesFailed((prev) => (prev ? false : prev));
     });
     tileLayerRef.current = tiles;
     layerStyleRef.current = style;
@@ -151,6 +170,7 @@ export default function LocationMap({
     });
 
     return () => {
+      if (loadTimer.current) window.clearTimeout(loadTimer.current);
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -279,6 +299,16 @@ export default function LocationMap({
         
         {/* Leaflet container ref */}
         <div ref={mapContainerRef} className="h-full w-full" style={{ zIndex: 1 }} />
+
+        {/* Loading spinner while first tiles arrive (never a silent black box) */}
+        {mapLoading && !tilesFailed && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 pointer-events-none" style={{ zIndex: 500 }}>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 rounded-full border-4 border-indigo-500/20 border-t-indigo-400 animate-spin"></div>
+              <span className="text-[11px] text-slate-300 font-medium">Loading map…</span>
+            </div>
+          </div>
+        )}
 
         {/* Floating Custom HUD Controls overlay */}
         <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5" style={{ zIndex: 1000 }}>
