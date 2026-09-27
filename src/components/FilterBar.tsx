@@ -186,8 +186,7 @@ export default function FilterBar({
           <span>
             {hasSearched ? (
               <>
-                Showing <strong className="text-indigo-300 text-base">{filteredCount}</strong> of{' '}
-                <strong className="text-slate-200">{totalCount}</strong> villages in active index
+                Found <strong className="text-indigo-300 text-base">{filteredCount.toLocaleString()}</strong> {filteredCount === 1 ? 'village' : 'villages'}
               </>
             ) : (
               <>

@@ -115,6 +115,14 @@ export default function App() {
   };
   const formatRecent = (r: RecentSearch) =>
     [r.state, r.township || r.townshipMm, r.villageEn || r.village].filter(Boolean).join(' • ') || 'All records';
+  const describeRecent = (r: RecentSearch) =>
+    [
+      r.state && `State: ${r.state}`,
+      r.township && `Township: ${r.township}`,
+      r.townshipMm && `Township (MM): ${r.townshipMm}`,
+      r.villageEn && `Village (EN): ${r.villageEn}`,
+      r.village && `Village (MM): ${r.village}`,
+    ].filter(Boolean).join(' • ') || 'No filters (all records)';
 
   // Burmese township name -> English (MIMU authoritative mapping from the index)
   const mmToEn = (mm: string): string | null => {
@@ -451,7 +459,7 @@ export default function App() {
                 <span className="text-xs text-slate-400 font-medium select-none">Recent searches:</span>
                 <div className="flex flex-wrap justify-center gap-2">
                   {recentSearches.map((r, i) => (
-                    <button key={i} onClick={() => applyRecent(r)} title="Repeat this search"
+                    <button key={i} onClick={() => applyRecent(r)} title={describeRecent(r)}
                       className="max-w-[220px] truncate px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-xs text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/40 transition cursor-pointer">
                       {formatRecent(r)}
                     </button>
@@ -499,7 +507,7 @@ export default function App() {
               <p className="flex gap-3"><span className="text-indigo-400 font-bold text-lg select-none">♦</span><span>Search {totalRecords.toLocaleString()} villages with precise GAD coordinates across Myanmar.</span></p>
               <p className="flex gap-3"><span className="text-indigo-400 font-bold text-lg select-none">♦</span><span>Data is split by state for instant loading, with real P-Codes, tracts, districts and sources.</span></p>
             </div>
-            <div className="mt-6"><span className="inline-flex items-center gap-1.5 text-xs bg-indigo-500/10 text-indigo-300 font-semibold py-1.5 px-3 rounded-lg border border-indigo-500/20"><Database size={12} /><span>Data Source: GAD Coordinate Database</span></span></div>
+            <div className="mt-6"><span className="inline-flex items-center gap-1.5 text-xs bg-indigo-500/10 text-indigo-300 font-semibold py-1.5 px-3 rounded-lg border border-indigo-500/20"><Database size={12} /><span>Data Source: GAD Coordinate Database • {totalRecords.toLocaleString()} records • Jul 2026</span></span></div>
           </div>
           <div id="features-card" className="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
