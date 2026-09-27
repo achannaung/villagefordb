@@ -9,10 +9,7 @@ interface FilterBarProps {
   setSelectedState: (state: string) => void;
   townshipQuery: string;
   setTownshipQuery: (q: string) => void;
-  townshipMmQuery: string;
-  setTownshipMmQuery: (q: string) => void;
   onPickTownship: (tw: string) => void;
-  onPickTownshipMm: (mm: string) => void;
   villageQuery: string;
   setVillageQuery: (q: string) => void;
   villageEnQuery: string;
@@ -33,10 +30,7 @@ export default function FilterBar({
   setSelectedState,
   townshipQuery,
   setTownshipQuery,
-  townshipMmQuery,
-  setTownshipMmQuery,
   onPickTownship,
-  onPickTownshipMm,
   villageQuery,
   setVillageQuery,
   villageEnQuery,
@@ -72,7 +66,7 @@ export default function FilterBar({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* State/Region filter */}
         <div className="flex flex-col gap-2">
           <label htmlFor="state-select" className="text-sm font-medium text-slate-300 flex items-center justify-between">
@@ -119,27 +113,6 @@ export default function FilterBar({
               value: t.township,
               hint: `${t.stateEn} • ${t.count.toLocaleString()}`,
             }))}
-          />
-        </div>
-
-        {/* Township Burmese name filter (MIMU authoritative names) */}
-        <div className="flex flex-col gap-2">
-          <label htmlFor="township-mm-input" className="text-sm font-medium text-slate-300">
-            Township Name (Burmese):
-          </label>
-          <AutocompleteInput
-            id="township-mm-input"
-            value={townshipMmQuery}
-            onChange={setTownshipMmQuery}
-            onKeyDown={handleKeyDown}
-            onPick={onPickTownshipMm}
-            placeholder="e.g. အမရပူရ"
-            items={townshipOptions
-              .filter((t) => t.mm)
-              .map((t) => ({
-                value: t.mm,
-                hint: `${t.township} • ${t.stateEn}`,
-              }))}
           />
         </div>
 
