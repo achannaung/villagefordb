@@ -236,23 +236,6 @@ select option {
   transition: all 0.3s ease;
 }
 
-/* Permanent village name tag above the marker (visible in all map modes) */
-.village-name-tip {
-  background: rgba(2, 6, 23, 0.92) !important;
-  border: 1px solid rgba(99, 102, 241, 0.45) !important;
-  color: #e2e8f0 !important;
-  font-family: "Inter", system-ui, sans-serif !important;
-  font-size: 11px !important;
-  font-weight: 600 !important;
-  border-radius: 8px !important;
-  padding: 3px 9px !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
-}
-
-.village-name-tip::before {
-  display: none !important;
-}
-
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
