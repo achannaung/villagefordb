@@ -52,7 +52,7 @@ export default function LocationMap({
   stateEn,
 }: LocationMapProps) {
   const [copied, setCopied] = useState(false);
-  const [isDarkMap, setIsDarkMap] = useState(true);
+  const [mapStyle, setMapStyle] = useState<'dark' | 'street' | 'sat'>('dark');
   const [mapZoom, setMapZoom] = useState(12);
   const [tilesFailed, setTilesFailed] = useState(false);
   const tileErrorCount = useRef(0);
@@ -83,9 +83,21 @@ export default function LocationMap({
   };
 
   // Key-free tile providers (no API key needed, reliable worldwide):
-  // dark  = Esri World Dark Gray Canvas, light = OpenStreetMap Standard
-  const DARK_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
-  const LIGHT_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  // dark   = Esri World Dark Gray Canvas
+  // street = OpenStreetMap Standard
+  // sat    = Esri World Imagery (satellite)
+  const TILE_URLS = {
+    dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    street: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    sat: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  } as const;
+  const DARK_URL = TILE_URLS.dark;
+  const STYLE_LABEL: Record<typeof mapStyle, string> = { dark: 'Dark', street: 'Street', sat: 'Satellite' };
+  const STYLE_ATTR: Record<typeof mapStyle, string> = {
+    dark: 'Esri • OpenStreetMap contributors',
+    street: '© OpenStreetMap contributors',
+    sat: 'Imagery © Esri, Maxar, Earthstar Geographics',
+  };
 
   // 1. Initialize Leaflet Map once on mount
   useEffect(() => {
@@ -146,10 +158,9 @@ export default function LocationMap({
 
     // Update tile layer url based on mode
     if (tileLayerRef.current) {
-      const tileUrl = isDarkMap ? DARK_URL : LIGHT_URL;
       tileErrorCount.current = 0;
       setTilesFailed(false);
-      tileLayerRef.current.setUrl(tileUrl);
+      tileLayerRef.current.setUrl(TILE_URLS[mapStyle]);
     }
 
     // Update or create custom marker
@@ -176,7 +187,7 @@ export default function LocationMap({
       const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map);
       markerRef.current = marker;
     }
-  }, [latitude, longitude, isDarkMap]);
+  }, [latitude, longitude, mapStyle]);
 
   // Custom Controls
   const handleZoomIn = () => {
@@ -191,9 +202,11 @@ export default function LocationMap({
     mapRef.current?.setView([latitude, longitude], 13);
   };
 
+  // Cycle Dark -> Street -> Satellite -> Dark
   const handleToggleStyle = () => {
-    setIsDarkMap(!isDarkMap);
+    setMapStyle((s) => (s === 'dark' ? 'street' : s === 'street' ? 'sat' : 'dark'));
   };
+  const nextStyleLabel = mapStyle === 'dark' ? 'Street View' : mapStyle === 'street' ? 'Satellite View' : 'Dark View';
 
   return (
     <div className="bg-slate-900/40 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex flex-col">
@@ -285,15 +298,15 @@ export default function LocationMap({
             <Maximize2 size={13} />
           </button>
 
-          {/* Style Toggle */}
+          {/* Style Toggle (cycles Dark / Street / Satellite) */}
           <button
             onClick={handleToggleStyle}
             className={`w-8 h-8 rounded-lg border text-slate-300 hover:text-white transition flex items-center justify-center shadow-lg cursor-pointer ${
-              isDarkMap 
-                ? 'bg-slate-950/90 border-slate-800' 
+              mapStyle === 'dark'
+                ? 'bg-slate-950/90 border-slate-800'
                 : 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
             }`}
-            title={isDarkMap ? "Switch to Street View" : "Switch to Dark View"}
+            title={`Switch to ${nextStyleLabel} (now: ${STYLE_LABEL[mapStyle]})`}
           >
             <Layers size={14} />
           </button>
@@ -303,6 +316,7 @@ export default function LocationMap({
         <div className="absolute bottom-3 right-3 z-10 bg-slate-950/90 border border-slate-800/80 text-[10px] px-2.5 py-1 rounded-lg shadow-xl flex items-center gap-1.5 backdrop-blur-sm pointer-events-none" style={{ zIndex: 1000 }}>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold text-slate-200">{villageName}</span>
+          <span className="text-indigo-300 font-semibold">{STYLE_LABEL[mapStyle]}</span>
           <span className="text-slate-400 font-mono">Zoom: {mapZoom}</span>
         </div>
 
@@ -322,7 +336,7 @@ export default function LocationMap({
           <Globe size={11} className="text-slate-600" />
           <span>Regional Context: {townshipEn} • {stateEn}</span>
         </span>
-        <span className="font-mono text-indigo-400/80">{isDarkMap ? 'Esri • OpenStreetMap contributors' : '© OpenStreetMap contributors'}</span>
+        <span className="font-mono text-indigo-400/80">{STYLE_ATTR[mapStyle]}</span>
       </div>
     </div>
   );
