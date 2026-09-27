@@ -59,8 +59,8 @@ export default function LocationMap({
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const layerStyleRef = useRef<typeof mapStyle>('dark');
 
   const dmsLat = useMemo(() => toDMS(latitude, true), [latitude]);
   const dmsLng = useMemo(() => toDMS(longitude, false), [longitude]);
@@ -91,12 +91,39 @@ export default function LocationMap({
     street: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     sat: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   } as const;
-  const DARK_URL = TILE_URLS.dark;
   const STYLE_LABEL: Record<typeof mapStyle, string> = { dark: 'Dark', street: 'Street', sat: 'Satellite' };
   const STYLE_ATTR: Record<typeof mapStyle, string> = {
     dark: 'Esri • OpenStreetMap contributors',
     street: '© OpenStreetMap contributors',
     sat: 'Imagery © Esri, Maxar, Earthstar Geographics',
+  };
+  // Highest zoom with real tiles per provider (verified). Beyond this Leaflet
+  // upscales (overzoom) instead of showing "data not available" placeholder tiles.
+  const STYLE_NATIVE_ZOOM: Record<typeof mapStyle, number> = { dark: 16, street: 19, sat: 18 };
+
+  // (Re)create the tile layer for a style, with missing-tile fallback notice
+  const addLayer = (map: L.Map, style: typeof mapStyle) => {
+    if (tileLayerRef.current) {
+      map.removeLayer(tileLayerRef.current);
+      tileLayerRef.current = null;
+    }
+    tileErrorCount.current = 0;
+    setTilesFailed(false);
+    const tiles = L.tileLayer(TILE_URLS[style], {
+      maxZoom: 19,
+      maxNativeZoom: STYLE_NATIVE_ZOOM[style],
+    }).addTo(map);
+    // If the network blocks tiles, show a fallback notice instead of a broken map
+    tiles.on('tileerror', () => {
+      tileErrorCount.current += 1;
+      if (tileErrorCount.current >= 8) setTilesFailed(true);
+    });
+    tiles.on('tileload', () => {
+      tileErrorCount.current = 0;
+      setTilesFailed(false);
+    });
+    tileLayerRef.current = tiles;
+    layerStyleRef.current = style;
   };
 
   // 1. Initialize Leaflet Map once on mount
@@ -112,23 +139,7 @@ export default function LocationMap({
     });
 
     // Dark Esri layer default (no API key required)
-    const tiles = L.tileLayer(DARK_URL, {
-      maxZoom: 19,
-    }).addTo(map);
-
-    // If the network blocks tiles, show a fallback notice instead of a broken map
-    tileErrorCount.current = 0;
-    tiles.on('tileerror', () => {
-      tileErrorCount.current += 1;
-      if (tileErrorCount.current >= 8) setTilesFailed(true);
-    });
-    tiles.on('tileload', () => {
-      tileErrorCount.current = 0;
-      setTilesFailed(false);
-    });
-
-    mapRef.current = map;
-    tileLayerRef.current = tiles;
+    addLayer(map, 'dark');
 
     // Scale Control
     L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
@@ -156,11 +167,10 @@ export default function LocationMap({
     // Center map smoothly on coords
     map.setView([latitude, longitude], map.getZoom());
 
-    // Update tile layer url based on mode
-    if (tileLayerRef.current) {
-      tileErrorCount.current = 0;
-      setTilesFailed(false);
-      tileLayerRef.current.setUrl(TILE_URLS[mapStyle]);
+    // Swap the tile layer only when the style changed (new layer carries
+    // the correct maxNativeZoom so deep zoom upscales instead of blanking)
+    if (layerStyleRef.current !== mapStyle) {
+      addLayer(map, mapStyle);
     }
 
     // Update or create custom marker
@@ -320,11 +330,11 @@ export default function LocationMap({
           <span className="text-slate-400 font-mono">Zoom: {mapZoom}</span>
         </div>
 
-        {/* Tile-blocked fallback notice (no API key needed by these providers,
-            but some networks block map servers — coordinates stay usable) */}
+        {/* Tile fallback notice: network block OR no imagery at this zoom.
+            Coordinates stay usable; try another view or zoom out. */}
         {tilesFailed && (
           <div className="absolute inset-x-3 top-3 z-10 bg-amber-500/90 text-slate-950 text-[11px] font-semibold px-3 py-2 rounded-lg shadow-xl flex items-center justify-between gap-2" style={{ zIndex: 1000 }}>
-            <span>Map tiles blocked on your network. Use “Open Maps” above for location.</span>
+            <span>Tiles unavailable here — try another view, zoom out, or use “Open Maps”.</span>
             <button onClick={() => setTilesFailed(false)} className="underline shrink-0" title="Dismiss">Hide</button>
           </div>
         )}
