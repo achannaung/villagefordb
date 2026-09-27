@@ -52,7 +52,7 @@ export default function LocationMap({
   stateEn,
 }: LocationMapProps) {
   const [copied, setCopied] = useState(false);
-  const [mapStyle, setMapStyle] = useState<'dark' | 'street' | 'sat'>('dark');
+  const [mapStyle, setMapStyle] = useState<'street' | 'sat'>('street');
   const [mapZoom, setMapZoom] = useState(12);
   const [tilesFailed, setTilesFailed] = useState(false);
   const [mapLoading, setMapLoading] = useState(true);
@@ -64,7 +64,7 @@ export default function LocationMap({
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
-  const layerStyleRef = useRef<typeof mapStyle>('dark');
+  const layerStyleRef = useRef<typeof mapStyle>('street');
 
   const dmsLat = useMemo(() => toDMS(latitude, true), [latitude]);
   const dmsLng = useMemo(() => toDMS(longitude, false), [longitude]);
@@ -87,23 +87,19 @@ export default function LocationMap({
   };
 
   // Key-free tile providers (no API key needed, reliable worldwide):
-  // dark   = Esri World Dark Gray Canvas
-  // street = OpenStreetMap Standard
-  // sat    = Esri World Imagery (satellite)
+  // street = OpenStreetMap Standard (default), sat = Esri World Imagery (satellite)
   const TILE_URLS = {
-    dark: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
     street: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     sat: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   } as const;
-  const STYLE_LABEL: Record<typeof mapStyle, string> = { dark: 'Dark', street: 'Street', sat: 'Satellite' };
+  const STYLE_LABEL: Record<typeof mapStyle, string> = { street: 'Street', sat: 'Satellite' };
   const STYLE_ATTR: Record<typeof mapStyle, string> = {
-    dark: 'Esri • OpenStreetMap contributors',
     street: '© OpenStreetMap contributors',
     sat: 'Imagery © Esri, Maxar, Earthstar Geographics',
   };
   // Highest zoom with real tiles per provider (verified). Beyond this Leaflet
   // upscales (overzoom) instead of showing "data not available" placeholder tiles.
-  const STYLE_NATIVE_ZOOM: Record<typeof mapStyle, number> = { dark: 16, street: 19, sat: 18 };
+  const STYLE_NATIVE_ZOOM: Record<typeof mapStyle, number> = { street: 19, sat: 18 };
 
   // (Re)create the tile layer for a style, with loading + fallback handling
   const addLayer = (map: L.Map, style: typeof mapStyle) => {
@@ -158,8 +154,8 @@ export default function LocationMap({
       attributionControl: false,
     });
 
-    // Dark Esri layer default (no API key required)
-    addLayer(map, 'dark');
+    // Street (OSM) layer default (no API key required)
+    addLayer(map, 'street');
     mapRef.current = map;
 
     // Scale Control
@@ -234,11 +230,11 @@ export default function LocationMap({
     mapRef.current?.setView([latitude, longitude], 13);
   };
 
-  // Cycle Dark -> Street -> Satellite -> Dark
+  // Toggle Street <-> Satellite
   const handleToggleStyle = () => {
-    setMapStyle((s) => (s === 'dark' ? 'street' : s === 'street' ? 'sat' : 'dark'));
+    setMapStyle((s) => (s === 'street' ? 'sat' : 'street'));
   };
-  const nextStyleLabel = mapStyle === 'dark' ? 'Street View' : mapStyle === 'street' ? 'Satellite View' : 'Dark View';
+  const nextStyleLabel = mapStyle === 'street' ? 'Satellite View' : 'Street View';
 
   return (
     <div className="bg-slate-900/40 border border-slate-800 rounded-xl overflow-hidden shadow-xl flex flex-col">
@@ -340,13 +336,13 @@ export default function LocationMap({
             <Maximize2 size={13} />
           </button>
 
-          {/* Style Toggle (cycles Dark / Street / Satellite) */}
+          {/* Style Toggle (Street / Satellite) */}
           <button
             onClick={handleToggleStyle}
             className={`w-8 h-8 rounded-lg border text-slate-300 hover:text-white transition flex items-center justify-center shadow-lg cursor-pointer ${
-              mapStyle === 'dark'
-                ? 'bg-slate-950/90 border-slate-800'
-                : 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+              mapStyle === 'sat'
+                ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+                : 'bg-slate-950/90 border-slate-800'
             }`}
             title={`Switch to ${nextStyleLabel} (now: ${STYLE_LABEL[mapStyle]})`}
           >
