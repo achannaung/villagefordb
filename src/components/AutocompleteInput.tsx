@@ -16,6 +16,8 @@ interface AutocompleteInputProps {
   inputRef?: React.RefObject<HTMLInputElement | null>;
   maxShown?: number;
   minChars?: number;
+  /** Called when the user explicitly picks a suggestion (click or Enter) */
+  onPick?: (value: string) => void;
 }
 
 /**
@@ -34,6 +36,7 @@ export default function AutocompleteInput({
   inputRef,
   maxShown = 8,
   minChars = 1,
+  onPick,
 }: AutocompleteInputProps) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
@@ -66,6 +69,7 @@ export default function AutocompleteInput({
     onChange(v);
     setOpen(false);
     setActive(-1);
+    onPick?.(v);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

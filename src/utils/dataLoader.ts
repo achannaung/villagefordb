@@ -23,6 +23,7 @@ export interface TownshipEntry {
   stateEn: string;
   township: string;
   count: number;
+  mm: string; // Burmese name from MIMU boundaries ('' when unavailable)
 }
 
 let manifestCache: Manifest | null = null;

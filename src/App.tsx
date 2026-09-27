@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { MOCK_VILLAGES } from './data/villages';
+import { MYANMAR_STATES_REGIONS } from './data/villages';
 import { Village, MonitorNote } from './types';
 import FilterBar from './components/FilterBar';
 import VillageTable from './components/VillageTable';
@@ -21,10 +22,11 @@ export default function App() {
 
   const [selectedState, setSelectedState] = useState('');
   const [townshipQuery, setTownshipQuery] = useState('');
+  const [townshipMmQuery, setTownshipMmQuery] = useState('');
   const [villageQuery, setVillageQuery] = useState('');
   const [villageEnQuery, setVillageEnQuery] = useState('');
 
-  const [appliedFilters, setAppliedFilters] = useState({ state: '', township: '', village: '', villageEn: '' });
+  const [appliedFilters, setAppliedFilters] = useState({ state: '', township: '', townshipMm: '', village: '', villageEn: '' });
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
   const townshipInputRef = useRef<HTMLInputElement | null>(null);
@@ -83,6 +85,7 @@ export default function App() {
   interface RecentSearch {
     state: string;
     township: string;
+    townshipMm: string;
     village: string;
     villageEn: string;
   }
@@ -95,13 +98,13 @@ export default function App() {
     }
   });
   const saveRecent = (r: RecentSearch) => {
-    if (!r.state && !r.township && !r.village && !r.villageEn) return;
+    if (!r.state && !r.township && !r.townshipMm && !r.village && !r.villageEn) return;
     setRecentSearches((prev) => {
       const next = [
         r,
         ...prev.filter(
           (p) =>
-            !(p.state === r.state && p.township === r.township && p.village === r.village && p.villageEn === r.villageEn)
+            !(p.state === r.state && p.township === r.township && p.townshipMm === r.townshipMm && p.village === r.village && p.villageEn === r.villageEn)
         ),
       ].slice(0, 6);
       try {
@@ -111,28 +114,42 @@ export default function App() {
     });
   };
   const formatRecent = (r: RecentSearch) =>
-    [r.state, r.township, r.villageEn || r.village].filter(Boolean).join(' • ') || 'All records';
+    [r.state, r.township || r.townshipMm, r.villageEn || r.village].filter(Boolean).join(' • ') || 'All records';
+
+  // Burmese township name -> English (MIMU authoritative mapping from the index)
+  const mmToEn = (mm: string): string | null => {
+    const q = mm.trim();
+    if (!q) return null;
+    return townshipOptions.find((t) => t.mm === q)?.township ?? null;
+  };
 
   // Core search with explicit params (loader caches files, repeats are instant)
-  const runSearch = async (s: string, ts: string, v: string, ve: string) => {
+  const runSearch = async (s: string, ts: string, tsm: string, v: string, ve: string) => {
     setIsLoading(true);
     setDownloadError(null);
     try {
-      const filters = { state: s, township: ts };
+      // Resolve a Burmese township name to English first (unknown MM = nothing to load)
+      const mapped = tsm ? mmToEn(tsm) : null;
+      if (tsm && !mapped && townshipOptions.length > 0) {
+        setAppliedFilters({ state: s, township: ts, townshipMm: tsm, village: v, villageEn: ve });
+        setHasSearched(true);
+        return;
+      }
+      const filters = { state: s, township: ts || mapped || '' };
       setLoadProgress(s ? `Loading ${s}…` : 'Finding matching townships…');
       const villages = await loadRelevantStates(filters, '', (done, total) => {
         if (total > 1) setLoadProgress(`Loading datasets ${done}/${total}…`);
       });
       mergeIntoPool(villages);
       setRegistryLoaded(true);
-      const applied = { state: s, township: ts, village: v, villageEn: ve };
+      const applied = { state: s, township: ts, townshipMm: tsm, village: v, villageEn: ve };
       setAppliedFilters(applied);
       setHasSearched(true);
       saveRecent(applied);
     } catch (err) {
       console.error(err);
       setDownloadError(err instanceof Error ? err.message : String(err));
-      setAppliedFilters({ state: s, township: ts, village: v, villageEn: ve });
+      setAppliedFilters({ state: s, township: ts, townshipMm: tsm, village: v, villageEn: ve });
       setHasSearched(true);
     } finally {
       setIsLoading(false);
@@ -140,22 +157,42 @@ export default function App() {
     }
   };
 
-  const handleSearch = () => runSearch(selectedState, townshipQuery, villageQuery, villageEnQuery);
+  const handleSearch = () => runSearch(selectedState, townshipQuery, townshipMmQuery, villageQuery, villageEnQuery);
+
+  // Picking an autocomplete suggestion runs an exact search immediately
+  const pickTownshipExact = (tw: string) => {
+    setTownshipQuery(tw);
+    setTownshipMmQuery('');
+    runSearch(selectedState, tw, '', villageQuery, villageEnQuery);
+  };
+  const pickTownshipMmExact = (mm: string) => {
+    setTownshipMmQuery(mm);
+    setTownshipQuery('');
+    runSearch(selectedState, '', mm, villageQuery, villageEnQuery);
+  };
+  const pickState = (s: string) => {
+    setSelectedState(s);
+    setTownshipQuery('');
+    setTownshipMmQuery('');
+    runSearch(s, '', '', villageQuery, villageEnQuery);
+  };
 
   const applyRecent = (r: RecentSearch) => {
     setSelectedState(r.state);
     setTownshipQuery(r.township);
+    setTownshipMmQuery(r.townshipMm);
     setVillageQuery(r.village);
     setVillageEnQuery(r.villageEn);
-    runSearch(r.state, r.township, r.village, r.villageEn);
+    runSearch(r.state, r.township, r.townshipMm, r.village, r.villageEn);
   };
 
   const handleClear = () => {
     setSelectedState('');
     setTownshipQuery('');
+    setTownshipMmQuery('');
     setVillageQuery('');
     setVillageEnQuery('');
-    setAppliedFilters({ state: '', township: '', village: '', villageEn: '' });
+    setAppliedFilters({ state: '', township: '', townshipMm: '', village: '', villageEn: '' });
     setHasSearched(false);
   };
 
@@ -201,21 +238,71 @@ export default function App() {
   const filteredVillages = useMemo(() => {
     const fState = appliedFilters.state;
     const fTs = appliedFilters.township.toLowerCase().trim();
+    const fTm = appliedFilters.townshipMm.trim();
     const fV = appliedFilters.village.toLowerCase().trim();
     const fVE = appliedFilters.villageEn.toLowerCase().trim();
-    if (!fState && !fTs && !fV && !fVE) return hasSearched ? allVillages.slice(0, 5000) : [];
+    if (!fState && !fTs && !fTm && !fV && !fVE) return hasSearched ? allVillages.slice(0, 5000) : [];
+    // Resolve Burmese township to English once per search (exact mapping)
+    const tmEn = fTm ? townshipOptions.find((t) => t.mm === fTm)?.township ?? null : null;
     const out: Village[] = [];
     for (let i = 0; i < allVillages.length; i++) {
       const v = allVillages[i];
       if (fState && v.stateEn !== fState) continue;
       if (fTs && !(v.townshipEn.toLowerCase().includes(fTs) || v.townshipMm.toLowerCase().includes(fTs))) continue;
+      if (fTm && (!tmEn || v.townshipEn !== tmEn)) continue;
       if (fV && !(v.nameEn.toLowerCase().includes(fV) || v.nameMm.toLowerCase().includes(fV))) continue;
       if (fVE && !v.nameEn.toLowerCase().includes(fVE)) continue;
       out.push(v);
       if (out.length >= 20000) break;
     }
     return out;
-  }, [allVillages, appliedFilters, hasSearched]);
+  }, [allVillages, appliedFilters, hasSearched, townshipOptions]);
+
+  // "Did you mean" hint when the typed township matches no known township
+  const tsQ = appliedFilters.township.trim();
+  const tsmQ = appliedFilters.townshipMm.trim();
+  const exactEnTs = !tsQ || townshipOptions.some((t) => t.township.toLowerCase() === tsQ.toLowerCase());
+  const mappedMmTs = !tsmQ || townshipOptions.some((t) => t.mm === tsmQ);
+  const showTsHint = hasSearched && !isLoading && filteredVillages.length === 0 && (!exactEnTs || !mappedMmTs);
+  const tsHintSuggestions: { label: string; sub: string; run: () => void }[] = [];
+  if (showTsHint) {
+    if (tsQ && !exactEnTs) {
+      const q = tsQ.toLowerCase();
+      for (const t of townshipOptions) {
+        if (t.township && t.township.toLowerCase().includes(q)) {
+          const name = t.township;
+          tsHintSuggestions.push({
+            label: name,
+            sub: `${t.stateEn} • ${t.count.toLocaleString()}`,
+            run: () => pickTownshipExact(name),
+          });
+          if (tsHintSuggestions.length >= 3) break;
+        }
+      }
+      const st = MYANMAR_STATES_REGIONS.find((s) => s.en.toLowerCase().includes(q));
+      if (st) {
+        const stateName = st.en;
+        tsHintSuggestions.push({
+          label: `${stateName} (State/Region)`,
+          sub: 'Search by state instead',
+          run: () => pickState(stateName),
+        });
+      }
+    }
+    if (tsmQ && !mappedMmTs) {
+      for (const t of townshipOptions) {
+        if (t.mm && t.mm.includes(tsmQ)) {
+          const mm = t.mm;
+          tsHintSuggestions.push({
+            label: mm,
+            sub: `${t.township} • ${t.stateEn}`,
+            run: () => pickTownshipMmExact(mm),
+          });
+          if (tsHintSuggestions.length >= 4) break;
+        }
+      }
+    }
+  }
 
   const handleCopyAllPCodes = () => {
     if (filteredVillages.length === 0) return;
@@ -319,6 +406,10 @@ export default function App() {
           townshipOptions={townshipOptions}
           villageEnOptions={villageEnOptions}
           villageMmOptions={villageMmOptions}
+          townshipMmQuery={townshipMmQuery}
+          setTownshipMmQuery={setTownshipMmQuery}
+          onPickTownship={pickTownshipExact}
+          onPickTownshipMm={pickTownshipMmExact}
           onSearch={handleSearch}
           onClear={handleClear}
           totalCount={totalRecords}
@@ -348,10 +439,10 @@ export default function App() {
               <span className="text-xs text-slate-400 font-medium select-none">Or click a shortcut:</span>
               <div className="flex flex-wrap justify-center gap-2">
                 {['Ayeyarwady Region', 'Shan State'].map((s) => (
-                  <button key={s} onClick={() => { setSelectedState(s); setTownshipQuery(''); setVillageQuery(''); setVillageEnQuery(''); runSearch(s, '', '', ''); }}
+                  <button key={s} onClick={() => { setSelectedState(s); setTownshipQuery(''); setTownshipMmQuery(''); setVillageQuery(''); setVillageEnQuery(''); runSearch(s, '', '', '', ''); }}
                     className="px-3.5 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-xs text-slate-300 border border-slate-800 hover:border-indigo-500/40 hover:text-indigo-300 transition cursor-pointer">{s}</button>
                 ))}
-                <button onClick={() => { setTownshipQuery('Bogale'); setSelectedState('Ayeyarwady Region'); setVillageQuery(''); setVillageEnQuery(''); runSearch('Ayeyarwady Region', 'Bogale', '', ''); }}
+                <button onClick={() => { setTownshipQuery('Bogale'); setTownshipMmQuery(''); setSelectedState('Ayeyarwady Region'); setVillageQuery(''); setVillageEnQuery(''); runSearch('Ayeyarwady Region', 'Bogale', '', '', ''); }}
                   className="px-3.5 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-xs text-slate-300 border border-slate-800 hover:border-indigo-500/40 hover:text-indigo-300 transition cursor-pointer">Bogale Township</button>
               </div>
             </div>
@@ -370,7 +461,34 @@ export default function App() {
             )}
           </div>
         ) : (
-          <VillageTable villages={filteredVillages} onSelectVillage={setSelectedVillage} onCopyAllPCodes={handleCopyAllPCodes} pcodeCopied={pcodeCopied} onExportCSV={handleExportCSV} />
+          <>
+            {showTsHint && (
+              <div className="glass-panel border-amber-500/30 bg-amber-500/5 rounded-2xl p-5 shadow-xl border">
+                <div className="text-sm font-semibold text-amber-200">
+                  No township named “{tsQ || tsmQ}” — did you mean:
+                </div>
+                {tsHintSuggestions.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {tsHintSuggestions.map((sg, i) => (
+                      <button
+                        key={i}
+                        onClick={sg.run}
+                        className="px-3.5 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-xs text-slate-200 border border-slate-800 hover:border-amber-500/50 hover:text-amber-200 transition cursor-pointer text-left"
+                      >
+                        <span className="font-semibold block">{sg.label}</span>
+                        <span className="text-[11px] text-slate-400 block">{sg.sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-amber-300/70 mt-2">
+                    Check the spelling, or pick a township from the autocomplete suggestions as you type.
+                  </p>
+                )}
+              </div>
+            )}
+            <VillageTable villages={filteredVillages} onSelectVillage={setSelectedVillage} onCopyAllPCodes={handleCopyAllPCodes} pcodeCopied={pcodeCopied} onExportCSV={handleExportCSV} />
+          </>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
