@@ -9,17 +9,11 @@ import { Database, Search, CheckCircle2, SlidersHorizontal, Loader2, Wifi, Alert
 import { getManifest, getTownshipIndex, loadRelevantStates } from './utils/dataLoader';
 import type { TownshipEntry } from './utils/dataLoader';
 
-const VillageDetailPanel = React.lazy(
-  (() => {
-    // Retry code-split chunk loads (flaky networks) before giving up
-    const load = (attempt: number): Promise<{ default: React.ComponentType<any> }> =>
-      import('./components/VillageDetailPanel').catch((err) => {
-        if (attempt >= 2) throw err;
-        return new Promise<never>((resolve) => setTimeout(resolve, 800)).then(() => load(attempt + 1));
-      });
-    return () => load(0);
-  })()
-);
+const loadPanelWithRetry = (attempt = 0): Promise<{ default: React.ComponentType<any> }> =>
+  import('./components/VillageDetailPanel').catch((err) => {
+    if (attempt >= 2) throw err;
+    return new Promise<never>((resolve) => setTimeout(resolve, 800)).then(() => loadPanelWithRetry(attempt + 1));
+  });
 
 export default function App() {
   // Dataset state — starts with tiny fallback, loads real data only on demand
@@ -40,6 +34,9 @@ export default function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
   const townshipInputRef = useRef<HTMLInputElement | null>(null);
+  // Remountable lazy panel: bumping panelLoadKey forces a genuinely fresh load attempt
+  const [panelLoadKey, setPanelLoadKey] = useState(0);
+  const VillageDetailPanel = useMemo(() => React.lazy(loadPanelWithRetry), [panelLoadKey]);
 
   const [noteStates, setNoteStates] = useState<Record<string, MonitorNote>>(() => {
     try {
@@ -507,7 +504,11 @@ export default function App() {
         </footer>
 
         {selectedVillage && (
-          <ErrorBoundary resetKey={selectedVillage.id} onReset={() => setSelectedVillage(null)}>
+          <ErrorBoundary
+            resetKey={`${selectedVillage.id}-${panelLoadKey}`}
+            onReset={() => setSelectedVillage(null)}
+            onRetry={() => setPanelLoadKey((k) => k + 1)}
+          >
             <Suspense
               fallback={
                 <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/70 backdrop-blur-sm">

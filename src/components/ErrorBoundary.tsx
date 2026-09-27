@@ -6,6 +6,8 @@ interface ErrorBoundaryProps {
   resetKey?: string | number;
   /** Called when the user dismisses the fallback (e.g. close the panel) */
   onReset?: () => void;
+  /** Called when the user taps "Try again" (re-attempts loading) */
+  onRetry?: () => void;
 }
 
 interface ErrorBoundaryState {
@@ -44,18 +46,34 @@ export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, E
             <div>
               <h3 className="text-lg font-bold text-white font-display">Couldn't open details</h3>
               <p className="text-xs text-slate-400 mt-1 max-w-xs">
-                The details view failed to load (usually a network hiccup). Your search results are safe.
+                The details view failed to load. Your search results are safe.
+              </p>
+              <p className="text-[11px] text-rose-300/80 font-mono mt-2 max-w-xs break-words">
+                Error: {this.state.error.message || String(this.state.error)}
               </p>
             </div>
-            <button
-              onClick={() => {
-                this.setState({ error: null });
-                this.props.onReset?.();
-              }}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold py-2.5 px-6 rounded-xl transition cursor-pointer"
-            >
-              Back to results
-            </button>
+            <div className="flex gap-2">
+              {this.props.onRetry && (
+                <button
+                  onClick={() => {
+                    this.setState({ error: null });
+                    this.props.onRetry?.();
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold py-2.5 px-6 rounded-xl transition cursor-pointer"
+                >
+                  Try again
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  this.setState({ error: null });
+                  this.props.onReset?.();
+                }}
+                className="border border-slate-700 hover:border-slate-500 text-slate-300 text-sm font-semibold py-2.5 px-6 rounded-xl transition cursor-pointer"
+              >
+                Back to results
+              </button>
+            </div>
           </div>
         </div>
       );
