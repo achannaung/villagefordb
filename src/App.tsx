@@ -198,23 +198,39 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   });
 
-  // Unique village names from the loaded pool → autocomplete suggestions
+  // Village suggestions scoped to the selected state/township (if any):
+  // typing "Bogale" limits ENG/MM suggestions to Bogale's villages only.
+  const scopedVillages = useMemo(() => {
+    const tq = townshipQuery.toLowerCase().trim();
+    if (!selectedState && !tq) return allVillages;
+    return allVillages.filter(
+      (v) =>
+        (!selectedState || v.stateEn === selectedState) &&
+        (!tq || v.townshipEn.toLowerCase().includes(tq))
+    );
+  }, [allVillages, selectedState, townshipQuery]);
+
+  // Unique village names from the scoped pool → autocomplete suggestions
   const villageEnOptions = useMemo(() => {
-    const set = new Set<string>();
-    for (const v of allVillages) {
-      if (v.nameEn) set.add(v.nameEn);
-      if (set.size >= 3000) break;
+    const seen = new Map<string, string>();
+    for (const v of scopedVillages) {
+      if (v.nameEn && !seen.has(v.nameEn)) seen.set(v.nameEn, v.townshipEn);
+      if (seen.size >= 3000) break;
     }
-    return [...set].sort();
-  }, [allVillages]);
+    return [...seen.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([value, tw]) => ({ value, hint: tw }));
+  }, [scopedVillages]);
   const villageMmOptions = useMemo(() => {
-    const set = new Set<string>();
-    for (const v of allVillages) {
-      if (v.nameMm) set.add(v.nameMm);
-      if (set.size >= 3000) break;
+    const seen = new Map<string, string>();
+    for (const v of scopedVillages) {
+      if (v.nameMm && v.nameMm !== '—' && !seen.has(v.nameMm)) seen.set(v.nameMm, v.townshipEn);
+      if (seen.size >= 3000) break;
     }
-    return [...set].sort();
-  }, [allVillages]);
+    return [...seen.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([value, tw]) => ({ value, hint: tw }));
+  }, [scopedVillages]);
 
   // Memoized filtering (fast even for 19k rows)
   const filteredVillages = useMemo(() => {

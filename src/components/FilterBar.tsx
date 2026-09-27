@@ -2,7 +2,7 @@ import React from 'react';
 import { Search, X, SlidersHorizontal, Database } from 'lucide-react';
 import { MYANMAR_STATES_REGIONS } from '../data/villages';
 import type { TownshipEntry } from '../utils/dataLoader';
-import AutocompleteInput from './AutocompleteInput';
+import AutocompleteInput, { type SuggestionItem } from './AutocompleteInput';
 
 interface FilterBarProps {
   selectedState: string;
@@ -16,8 +16,8 @@ interface FilterBarProps {
   setVillageEnQuery: (q: string) => void;
   townshipInputRef: React.RefObject<HTMLInputElement | null>;
   townshipOptions: TownshipEntry[];
-  villageEnOptions: string[];
-  villageMmOptions: string[];
+  villageEnOptions: (string | SuggestionItem)[];
+  villageMmOptions: (string | SuggestionItem)[];
   onSearch: () => void;
   onClear: () => void;
   totalCount: number;
