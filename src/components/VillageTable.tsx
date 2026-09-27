@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Village } from '../types';
 import { 
   ArrowUpDown, 
@@ -37,6 +37,22 @@ export default function VillageTable({
 
   // Copy Feedback State
   const [copiedVillageId, setCopiedVillageId] = useState<string | null>(null);
+
+  // Toast notification for copy confirmation (visible on desktop and mobile)
+  const [copyToast, setCopyToast] = useState<string | null>(null);
+  const toastTimer = useRef<number | null>(null);
+
+  const showCopyToast = (message: string) => {
+    setCopyToast(message);
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setCopyToast(null), 1800);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    };
+  }, []);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -100,9 +116,18 @@ export default function VillageTable({
 
   const handleCopyName = (e: React.MouseEvent, id: string, name: string) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(name);
-    setCopiedVillageId(id);
-    setTimeout(() => setCopiedVillageId(null), 2000);
+    if (!name || name === '—') return;
+    const label = name.length > 32 ? `${name.slice(0, 32)}…` : name;
+    navigator.clipboard
+      .writeText(name)
+      .then(() => {
+        setCopiedVillageId(id);
+        setTimeout(() => setCopiedVillageId((prev) => (prev === id ? null : prev)), 2000);
+        showCopyToast(`Copied "${label}"`);
+      })
+      .catch(() => {
+        showCopyToast('Copy failed — clipboard blocked');
+      });
   };
 
   // Smart Pagination generator for large datasets (handles 72,000+ rows / 7,200+ pages)
@@ -246,10 +271,12 @@ export default function VillageTable({
                     {village.stateEn}
                   </td>
 
-                  {/* Township */}
+                  {/* Township (Mm sub-line only when it differs from En) */}
                   <td className="px-3 py-3 sm:px-6 sm:py-3.5 text-slate-300 font-sans text-xs sm:text-sm">
                     <span className="font-medium">{village.townshipEn}</span>
-                    <span className="text-slate-400 text-xs block mt-0.5">{village.townshipMm}</span>
+                    {village.townshipMm && village.townshipMm !== village.townshipEn && (
+                      <span className="text-slate-400 text-xs block mt-0.5">{village.townshipMm}</span>
+                    )}
                   </td>
 
                   {/* English Name */}
@@ -270,9 +297,23 @@ export default function VillageTable({
                     </div>
                   </td>
 
-                  {/* Burmese Name */}
-                  <td className="px-3 py-3 sm:px-6 sm:py-3.5 font-sans font-medium text-white text-sm sm:text-base">
-                    {village.nameMm}
+                  {/* Burmese Name (click-to-copy, "—" when missing) */}
+                  <td
+                    className="px-3 py-3 sm:px-6 sm:py-3.5 font-sans font-medium text-white text-sm sm:text-base cursor-pointer group/copy"
+                    onClick={(e) => handleCopyName(e, village.id, village.nameMm)}
+                    title={village.nameMm === '—' ? 'No Burmese name' : 'Click to copy Burmese name'}
+                  >
+                    <div className="flex items-center gap-1.5 hover:text-indigo-300 transition-colors">
+                      <span className="underline decoration-dotted decoration-slate-600 group-hover/copy:decoration-indigo-400">
+                        {village.nameMm}
+                      </span>
+                      {village.nameMm !== '—' &&
+                        (copiedVillageId === village.id ? (
+                          <Check size={12} className="text-emerald-400 shrink-0" />
+                        ) : (
+                          <Copy size={12} className="text-slate-400 opacity-0 group-hover/copy:opacity-100 transition-opacity shrink-0" />
+                        ))}
+                    </div>
                   </td>
 
                   {/* Action */}
@@ -361,6 +402,15 @@ export default function VillageTable({
               <ChevronRight size={16} />
             </button>
           </div>
+        </div>
+      )}
+      {/* Copy confirmation toast */}
+      {copyToast && (
+        <div className="fixed bottom-6 right-6 z-[60] bg-slate-900 text-white pl-3 pr-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 border border-slate-700 animate-fade-in max-w-[calc(100vw-3rem)]">
+          <span className="p-1 rounded-full bg-emerald-500/20">
+            <Check size={13} className="text-emerald-400" />
+          </span>
+          <span className="text-xs font-medium truncate">{copyToast}</span>
         </div>
       )}
     </div>

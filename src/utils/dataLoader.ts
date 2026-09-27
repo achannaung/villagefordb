@@ -74,7 +74,7 @@ function toVillage(stateEn: string, idx: number, r: CompactRow): Village {
   return {
     id: `v-${stateSlug(stateEn)}-${idx}`,
     pcode: pcode || '—',
-    nameMm: vmm || ven || 'ရွာသစ်',
+    nameMm: vmm || '—',
     nameEn: ven || vmm || 'Village New',
     tractMm: tract || 'ကျေးရွာအုပ်စု',
     tractEn: tract || 'Village Tract',
