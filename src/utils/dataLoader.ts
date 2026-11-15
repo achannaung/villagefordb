@@ -120,7 +120,15 @@ export async function loadRelevantStates(
     onProgress?.(1, 1);
     return v;
   }
-  // 2) Township query -> look up candidate states from tiny index
+  // 2) Township query -> look up candidate states from tiny index.
+  // The index covers every township in the data, so the matching states are
+  // ALWAYS the only files that can contain results for this query:
+  // - 1+ matches: load exactly those state files (no arbitrary <=5 cap —
+  //   a broad substring like "kya" legitimately spans 8 states, and loading
+  //   all 15 files for it wasted ~10s and several MB).
+  // - 0 matches: no township in the country matches, and the caller's
+  //   township filter would discard every row anyway — return instantly
+  //   instead of downloading all 15 files just to show 0 results.
   const tq = filters.township.toLowerCase().trim();
   if (tq) {
     const idx = await getTownshipIndex(base);
@@ -129,21 +137,23 @@ export async function loadRelevantStates(
       if (t.township.toLowerCase().includes(tq)) matched.add(t.stateEn);
     }
     const states = [...matched];
-    if (states.length > 0 && states.length <= 5) {
-      const out: Village[] = [];
-      let done = 0;
-      await Promise.all(
-        states.map(async (s) => {
-          const v = await loadState(s, base);
-          out.push(...v);
-          done++;
-          onProgress?.(done, states.length);
-        })
-      );
-      return out;
+    if (states.length === 0) {
+      onProgress?.(0, 0);
+      return [];
     }
+    const out: Village[] = [];
+    let done = 0;
+    await Promise.all(
+      states.map(async (s) => {
+        const v = await loadState(s, base);
+        out.push(...v);
+        done++;
+        onProgress?.(done, states.length);
+      })
+    );
+    return out;
   }
-  // 3) No filter (or very broad): load all progressively, smallest first
+  // 3) Village-name-only search (no state, no township): load all progressively, smallest first
   const manifest = await getManifest(base);
   const ordered = [...manifest.states].sort((a, b) => a.count - b.count);
   const out: Village[] = [];

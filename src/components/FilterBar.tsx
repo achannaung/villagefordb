@@ -15,6 +15,7 @@ interface FilterBarProps {
   villageEnQuery: string;
   setVillageEnQuery: (q: string) => void;
   townshipInputRef: React.RefObject<HTMLInputElement | null>;
+  villageEnInputRef?: React.RefObject<HTMLInputElement | null>;
   townshipOptions: TownshipEntry[];
   villageEnOptions: (string | SuggestionItem)[];
   villageMmOptions: (string | SuggestionItem)[];
@@ -36,6 +37,7 @@ export default function FilterBar({
   villageEnQuery,
   setVillageEnQuery,
   townshipInputRef,
+  villageEnInputRef,
   townshipOptions,
   villageEnOptions,
   villageMmOptions,
@@ -123,6 +125,7 @@ export default function FilterBar({
           </label>
           <AutocompleteInput
             id="village-en-input"
+            inputRef={villageEnInputRef}
             value={villageEnQuery}
             onChange={setVillageEnQuery}
             onKeyDown={handleKeyDown}

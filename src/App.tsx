@@ -34,6 +34,7 @@ export default function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
   const townshipInputRef = useRef<HTMLInputElement | null>(null);
+  const villageEnInputRef = useRef<HTMLInputElement | null>(null);
   // Remountable lazy panel: bumping panelLoadKey forces a genuinely fresh load attempt
   const [panelLoadKey, setPanelLoadKey] = useState(0);
   const VillageDetailPanel = useMemo(() => React.lazy(loadPanelWithRetry), [panelLoadKey]);
@@ -145,6 +146,11 @@ export default function App() {
       setAppliedFilters(applied);
       setHasSearched(true);
       saveRecent(applied);
+      // Township-first flow: after a township-driven search, the user's next
+      // step is almost always narrowing by village name — move focus there.
+      if (ts.trim() && !ve.trim()) {
+        window.setTimeout(() => villageEnInputRef.current?.focus({ preventScroll: true }), 60);
+      }
     } catch (err) {
       console.error(err);
       setDownloadError(err instanceof Error ? err.message : String(err));
@@ -388,6 +394,7 @@ export default function App() {
           villageEnQuery={villageEnQuery}
           setVillageEnQuery={setVillageEnQuery}
           townshipInputRef={townshipInputRef}
+          villageEnInputRef={villageEnInputRef}
           townshipOptions={townshipOptions}
           villageEnOptions={villageEnOptions}
           villageMmOptions={villageMmOptions}

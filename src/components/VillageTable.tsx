@@ -11,6 +11,8 @@ import {
   Bookmark, 
   ChevronLeft, 
   ChevronRight,
+  ChevronDown,
+  Layers,
   Sparkles
 } from 'lucide-react';
 
@@ -22,7 +24,7 @@ interface VillageTableProps {
   onExportCSV: () => void;
 }
 
-type SortField = 'nameMm' | 'nameEn' | 'townshipEn' | 'stateEn' | 'pcode';
+type SortField = 'nameMm' | 'nameEn' | 'townshipEn' | 'stateEn' | 'pcode' | 'tractEn';
 
 export default function VillageTable({
   villages,
@@ -63,6 +65,39 @@ export default function VillageTable({
     setCurrentPage(1);
   }, [villages]);
 
+  // Group-by-Tract state. Defaults ON when the result set is a single township
+  // with many villages (the township-first flow), until the user toggles it.
+  const [groupByTract, setGroupByTract] = useState(false);
+  const [groupTouched, setGroupTouched] = useState(false);
+  const [collapsedTracts, setCollapsedTracts] = useState<Set<string>>(new Set());
+
+  const isSingleTownship = useMemo(() => {
+    if (villages.length === 0) return false;
+    const keys = new Set(villages.map((v) => `${v.stateEn}|${v.townshipEn}`));
+    return keys.size === 1;
+  }, [villages]);
+
+  useEffect(() => {
+    setCollapsedTracts(new Set());
+    if (!groupTouched) setGroupByTract(isSingleTownship && villages.length > 50);
+  }, [villages, isSingleTownship, groupTouched]);
+
+  // Village count per tract across the whole filtered set (for group headers)
+  const tractCounts = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const v of villages) m.set(v.tractEn, (m.get(v.tractEn) || 0) + 1);
+    return m;
+  }, [villages]);
+
+  const toggleTract = (tract: string) => {
+    setCollapsedTracts((prev) => {
+      const next = new Set(prev);
+      if (next.has(tract)) next.delete(tract);
+      else next.add(tract);
+      return next;
+    });
+  };
+
   // Cached collator: creating Intl.Collator per comparison was a major slowdown for 19k rows
   const collator = useMemo(() => new Intl.Collator('my', { sensitivity: 'base', numeric: true }), []);
 
@@ -89,6 +124,11 @@ export default function VillageTable({
   const sortedVillages = useMemo(() => {
     const arr = [...villages];
     arr.sort((a, b) => {
+      // When grouping, tract is the primary key so each tract's villages stay together
+      if (groupByTract) {
+        const tc = collator.compare(a.tractEn, b.tractEn);
+        if (tc !== 0) return tc;
+      }
       const valA = a[sortField];
       const valB = b[sortField];
       if (typeof valA === 'string' && typeof valB === 'string') {
@@ -100,13 +140,40 @@ export default function VillageTable({
       return 0;
     });
     return arr;
-  }, [villages, sortField, sortDirection, collator]);
+  }, [villages, sortField, sortDirection, collator, groupByTract]);
 
   // Pagination calculations
   const totalItems = sortedVillages.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedVillages = sortedVillages.slice(startIndex, startIndex + itemsPerPage);
+
+  // Display rows for the current page: village rows, with a tract group header
+  // inserted whenever the tract changes (when grouping is on). A header gets
+  // "(continued)" when the same tract already started on the previous page.
+  type PageRow =
+    | { type: 'header'; tract: string; count: number; continued: boolean; collapsed: boolean }
+    | { type: 'village'; village: Village };
+  const pageRows = useMemo<PageRow[]>(() => {
+    if (!groupByTract) return paginatedVillages.map((village) => ({ type: 'village' as const, village }));
+    const rows: PageRow[] = [];
+    const prevPageTract = startIndex > 0 ? sortedVillages[startIndex - 1]?.tractEn ?? null : null;
+    let lastTract: string | null = null;
+    paginatedVillages.forEach((village, i) => {
+      if (village.tractEn !== lastTract) {
+        rows.push({
+          type: 'header',
+          tract: village.tractEn,
+          count: tractCounts.get(village.tractEn) || 0,
+          continued: i === 0 && prevPageTract === village.tractEn,
+          collapsed: collapsedTracts.has(village.tractEn),
+        });
+        lastTract = village.tractEn;
+      }
+      if (!collapsedTracts.has(village.tractEn)) rows.push({ type: 'village', village });
+    });
+    return rows;
+  }, [groupByTract, paginatedVillages, sortedVillages, startIndex, tractCounts, collapsedTracts]);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -128,6 +195,16 @@ export default function VillageTable({
       .catch(() => {
         showCopyToast('Copy failed — clipboard blocked');
       });
+  };
+
+  const handleCopyCoords = (e: React.MouseEvent, village: Village) => {
+    e.stopPropagation();
+    if (village.latitude === 0 && village.longitude === 0) return;
+    const text = `${village.latDisplay}, ${village.lngDisplay}`;
+    navigator.clipboard
+      .writeText(text)
+      .then(() => showCopyToast(`Copied "${text}"`))
+      .catch(() => showCopyToast('Copy failed — clipboard blocked'));
   };
 
   // Smart Pagination generator for large datasets (handles 72,000+ rows / 7,200+ pages)
@@ -172,7 +249,46 @@ export default function VillageTable({
           <p className="text-xs text-slate-400 mt-0.5">Click column headers to sort. Click a row to view full details.</p>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end flex-wrap">
+          <button
+            onClick={() => {
+              setGroupTouched(true);
+              setGroupByTract((g) => !g);
+            }}
+            disabled={villages.length === 0}
+            aria-pressed={groupByTract}
+            className={`flex-1 sm:flex-none border font-medium py-2 px-4 rounded-xl text-sm transition duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none ${
+              groupByTract
+                ? 'border-indigo-500 bg-indigo-500/15 text-white'
+                : 'border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/10 text-slate-300 hover:text-white'
+            }`}
+            title="Group villages by village tract"
+          >
+            <Layers size={16} />
+            <span>Group by Tract</span>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${groupByTract ? 'bg-indigo-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
+              {groupByTract ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          {groupByTract && villages.length > 0 && (
+            <div className="flex items-center gap-2 text-xs">
+              <button
+                onClick={() => setCollapsedTracts(new Set())}
+                className="text-indigo-300 hover:text-white transition cursor-pointer"
+              >
+                Expand all
+              </button>
+              <span className="text-slate-600">|</span>
+              <button
+                onClick={() => setCollapsedTracts(new Set(tractCounts.keys()))}
+                className="text-indigo-300 hover:text-white transition cursor-pointer"
+              >
+                Collapse all
+              </button>
+            </div>
+          )}
+
           <button
             onClick={onCopyAllPCodes}
             disabled={villages.length === 0}
@@ -217,11 +333,11 @@ export default function VillageTable({
             </p>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse table-auto min-w-[720px]">
+          <table className="w-full text-left border-collapse table-auto min-w-[880px]">
             <thead>
               <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-300 text-xs font-semibold uppercase tracking-wider">
                 <th 
-                  className="px-3 py-3 sm:px-6 sm:py-4 font-sans cursor-pointer hover:bg-slate-900/60 transition"
+                  className="px-3 py-3 sm:px-6 sm:py-4 font-sans cursor-pointer hover:bg-slate-900/60 transition hidden sm:table-cell"
                   onClick={() => handleSort('stateEn')}
                 >
                   <div className="flex items-center">
@@ -236,6 +352,15 @@ export default function VillageTable({
                   <div className="flex items-center">
                     <span>Township</span>
                     {getSortIndicator('townshipEn')}
+                  </div>
+                </th>
+                <th 
+                  className="px-3 py-3 sm:px-6 sm:py-4 font-sans cursor-pointer hover:bg-slate-900/60 transition"
+                  onClick={() => handleSort('tractEn')}
+                >
+                  <div className="flex items-center">
+                    <span>Village Tract</span>
+                    {getSortIndicator('tractEn')}
                   </div>
                 </th>
                 <th 
@@ -256,11 +381,43 @@ export default function VillageTable({
                     {getSortIndicator('nameMm')}
                   </div>
                 </th>
+                <th className="px-3 py-3 sm:px-6 sm:py-4 font-sans hidden md:table-cell">
+                  <div className="flex items-center">
+                    <span>Coordinates</span>
+                  </div>
+                </th>
                 <th                   className="px-3 py-3 sm:px-6 sm:py-4 font-sans text-center w-[80px] sm:w-[100px]">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/50">
-              {paginatedVillages.map((village) => (
+              {pageRows.map((row) => {
+                if (row.type === 'header') {
+                  return (
+                    <tr
+                      key={`tract-${row.tract}`}
+                      onClick={() => toggleTract(row.tract)}
+                      className="bg-indigo-950/40 hover:bg-indigo-950/60 cursor-pointer transition"
+                      title={row.collapsed ? 'Expand tract' : 'Collapse tract'}
+                    >
+                      <td colSpan={7} className="px-3 py-2 sm:px-6 sm:py-2.5">
+                        <div className="flex items-center gap-2 text-xs sm:text-sm">
+                          {row.collapsed ? (
+                            <ChevronRight size={14} className="text-indigo-300 shrink-0" />
+                          ) : (
+                            <ChevronDown size={14} className="text-indigo-300 shrink-0" />
+                          )}
+                          <span className="font-semibold text-indigo-200">{row.tract}</span>
+                          {row.continued && <span className="text-[11px] text-slate-400">(continued)</span>}
+                          <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">
+                            {row.count} {row.count === 1 ? 'village' : 'villages'}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                }
+                const village = row.village;
+                return (
                 <tr
                   key={village.id}
                   onClick={() => onSelectVillage(village)}
@@ -271,7 +428,7 @@ export default function VillageTable({
                   className="glass-table-row hover:bg-slate-800/30 cursor-pointer transition text-sm group"
                 >
                   {/* State / Region */}
-                  <td className="px-3 py-3 sm:px-6 sm:py-3.5 text-slate-300 font-sans text-xs sm:text-sm">
+                  <td className="px-3 py-3 sm:px-6 sm:py-3.5 text-slate-300 font-sans text-xs sm:text-sm hidden sm:table-cell">
                     {village.stateEn}
                   </td>
 
@@ -281,6 +438,11 @@ export default function VillageTable({
                     {village.townshipMm && village.townshipMm !== village.townshipEn && (
                       <span className="text-slate-400 text-xs block mt-0.5">{village.townshipMm}</span>
                     )}
+                  </td>
+
+                  {/* Village Tract */}
+                  <td className="px-3 py-3 sm:px-6 sm:py-3.5 text-slate-300 font-sans text-xs sm:text-sm">
+                    {village.tractEn}
                   </td>
 
                   {/* English Name */}
@@ -320,6 +482,25 @@ export default function VillageTable({
                     </div>
                   </td>
 
+                  {/* Coordinates (click to copy full precision; "—" when 0,0) */}
+                  <td
+                    className="px-3 py-3 sm:px-6 sm:py-3.5 font-mono text-[11px] sm:text-xs text-slate-300 hidden md:table-cell"
+                    onClick={(e) => handleCopyCoords(e, village)}
+                    title={
+                      village.latitude === 0 && village.longitude === 0
+                        ? 'No coordinates for this village'
+                        : 'Click to copy coordinates'
+                    }
+                  >
+                    {village.latitude === 0 && village.longitude === 0 ? (
+                      <span className="text-slate-500">—</span>
+                    ) : (
+                      <span className="underline decoration-dotted decoration-slate-600 hover:text-indigo-300 transition-colors cursor-pointer">
+                        {village.latitude.toFixed(4)}, {village.longitude.toFixed(4)}
+                      </span>
+                    )}
+                  </td>
+
                   {/* Action */}
                   <td className="px-3 py-3 sm:px-6 sm:py-3.5 text-center">
                     <button
@@ -335,7 +516,8 @@ export default function VillageTable({
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         )}
