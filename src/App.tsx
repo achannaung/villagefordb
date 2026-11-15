@@ -16,6 +16,32 @@ const loadPanelWithRetry = (attempt = 0): Promise<{ default: React.ComponentType
   });
 
 export default function App() {
+  // PWA install: capture Chrome's beforeinstallprompt and offer an
+  // "install as app" button in the header while it is available.
+  const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
+  useEffect(() => {
+    const onPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    const onInstalled = () => setInstallPrompt(null);
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
+  }, []);
+  const handleInstall = async () => {
+    const promptEvent = installPrompt as unknown as {
+      prompt: () => Promise<void>;
+      userChoice: Promise<{ outcome: string }>;
+    } | null;
+    if (!promptEvent) return;
+    await promptEvent.prompt();
+    const choice = await promptEvent.userChoice;
+    if (choice.outcome === 'accepted') setInstallPrompt(null);
+  };
   // Dataset state — starts with tiny fallback, loads real data only on demand
   const [allVillages, setAllVillages] = useState<Village[]>(MOCK_VILLAGES);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -357,6 +383,15 @@ export default function App() {
             Developed by <span className="text-accent-300 font-extrabold">ACA</span>
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-transparent via-accent-500 to-transparent mx-auto mt-4 rounded-full"></div>
+          {installPrompt && (
+            <button
+              type="button"
+              onClick={handleInstall}
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-accent-500/25 transition hover:bg-accent-600 cursor-pointer"
+            >
+              📲 App အဖြစ် သွင်းရန်
+            </button>
+          )}
         </header>
 
         <div id="registry-status-banner" className="w-full">
