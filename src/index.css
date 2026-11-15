@@ -1,9 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Myanmar:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Myanmar:wght@400;500;600;700&family=Padauk:wght@400;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "Noto Sans Myanmar", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Space Grotesk", "Inter", "Noto Sans Myanmar", system-ui, sans-serif;
+  /* Myanmar: Noto Sans Myanmar primary, Padauk as an independent second
+     webfont — per-cluster fallback covers a device/font that mishandles a
+     specific ligature (e.g. ကြီး) in the first font. */
+  --font-sans: "Inter", "Noto Sans Myanmar", "Padauk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Inter", "Noto Sans Myanmar", "Padauk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   /* Burmese script needs taller line-height so stacked glyphs never clip */
   --leading-myanmar: 1.75;
