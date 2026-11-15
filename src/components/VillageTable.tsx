@@ -436,7 +436,7 @@ export default function VillageTable({
                   <td className="px-3 py-3 sm:px-6 sm:py-3.5 text-slate-300 font-sans text-xs sm:text-sm">
                     <span className="font-medium">{village.townshipEn}</span>
                     {village.townshipMm && village.townshipMm !== village.townshipEn && (
-                      <span className="text-slate-400 text-xs block mt-0.5">{village.townshipMm}</span>
+                      <span className="text-slate-400 text-xs block mt-0.5 leading-myanmar">{village.townshipMm}</span>
                     )}
                   </td>
 
@@ -470,7 +470,7 @@ export default function VillageTable({
                     title={village.nameMm === '—' ? 'No Burmese name' : 'Click to copy Burmese name'}
                   >
                     <div className="flex items-center gap-1.5 hover:text-accent-300 transition-colors">
-                      <span className="underline decoration-dotted decoration-slate-600 group-hover/copy:decoration-accent-400">
+                      <span className="underline decoration-dotted decoration-slate-600 group-hover/copy:decoration-accent-400 leading-myanmar">
                         {village.nameMm}
                       </span>
                       {village.nameMm !== '—' &&

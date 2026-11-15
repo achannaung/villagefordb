@@ -167,7 +167,7 @@ export default function AutocompleteInput({
                     : 'text-slate-300 hover:bg-slate-800/70'
                 }`}
               >
-                <span className="truncate font-medium">{m.value}</span>
+                <span className="truncate font-medium leading-myanmar">{m.value}</span>
                 {m.hint && (
                   <span className="text-[11px] text-slate-400 truncate shrink-0">{m.hint}</span>
                 )}

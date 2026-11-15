@@ -105,7 +105,7 @@ Source: ${village.source}`;
           {/* Main Titles */}
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-3xl font-extrabold text-white font-display tracking-tight">{village.nameMm}</h1>
+              <h1 className="text-3xl font-extrabold text-white font-display tracking-tight leading-myanmar">{village.nameMm}</h1>
               <span className="text-lg font-medium text-slate-400 font-sans">/ {village.nameEn}</span>
             </div>
             <div className="flex items-center gap-1 text-xs text-slate-400 font-sans flex-wrap">
