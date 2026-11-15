@@ -162,6 +162,31 @@ export default function App() {
     }
   };
 
+  // Township suggestions are scoped to the selected State/Region — picking a
+  // state shows only that state's townships, like picking a township shows
+  // only that township's villages.
+  const scopedTownshipOptions = useMemo(
+    () =>
+      selectedState
+        ? townshipOptions.filter((t) => t.stateEn === selectedState)
+        : townshipOptions,
+    [townshipOptions, selectedState]
+  );
+
+  // If the typed township doesn't exist in the newly selected state, clear it
+  // (e.g. "Bogale" typed, then Shan State picked) so a stale cross-state
+  // township can't linger in the filter.
+  useEffect(() => {
+    if (!selectedState || !townshipQuery.trim() || townshipOptions.length === 0) return;
+    const q = townshipQuery.toLowerCase().trim();
+    const existsInState = townshipOptions.some(
+      (t) => t.stateEn === selectedState && t.township.toLowerCase().includes(q)
+    );
+    if (!existsInState) setTownshipQuery('');
+    // Run only when the state selection changes, not on every keystroke
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedState]);
+
   const handleSearch = () => runSearch(selectedState, townshipQuery, villageQuery, villageEnQuery);
 
   // Picking an autocomplete suggestion runs an exact search immediately
@@ -395,7 +420,7 @@ export default function App() {
           setVillageEnQuery={setVillageEnQuery}
           townshipInputRef={townshipInputRef}
           villageEnInputRef={villageEnInputRef}
-          townshipOptions={townshipOptions}
+          townshipOptions={scopedTownshipOptions}
           villageEnOptions={villageEnOptions}
           villageMmOptions={villageMmOptions}
           onPickTownship={pickTownshipExact}
