@@ -49,18 +49,26 @@ export default function AutocompleteInput({
   const matches = useMemo(() => {
     const q = value.toLowerCase().trim();
     if (q.length < minChars) return [];
-    const out: SuggestionItem[] = [];
+    // Rank by match quality so a name match always beats a hint-only match:
+    // typing "Sagaing" must surface the Sagaing township itself, not just the
+    // first N townships whose state hint happens to contain "Sagaing".
+    // 3 = exact name, 2 = name starts with query, 1 = name contains query,
+    // 0 = hint-only match. Stable within a rank (original order preserved).
+    const scored: { it: SuggestionItem; score: number }[] = [];
     for (const it of normalized) {
-      if (
-        it.value.toLowerCase().includes(q) ||
-        (it.hint ? it.hint.toLowerCase().includes(q) : false)
-      ) {
-        // skip exact single match (nothing to suggest)
-        if (normalized.length > 1 || it.value.toLowerCase() !== q) out.push(it);
-        if (out.length >= maxShown) break;
-      }
+      const v = it.value.toLowerCase();
+      let score = -1;
+      if (v === q) score = 3;
+      else if (v.startsWith(q)) score = 2;
+      else if (v.includes(q)) score = 1;
+      else if (it.hint && it.hint.toLowerCase().includes(q)) score = 0;
+      if (score < 0) continue;
+      // skip exact single match (nothing to suggest)
+      if (normalized.length <= 1 && v === q) continue;
+      scored.push({ it, score });
     }
-    return out;
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, maxShown).map((s) => s.it);
   }, [normalized, value, maxShown, minChars]);
 
   const showDropdown = open && matches.length > 0;
