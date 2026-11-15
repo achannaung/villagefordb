@@ -59,7 +59,7 @@ export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, E
                     this.setState({ error: null });
                     this.props.onRetry?.();
                   }}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold py-2.5 px-6 rounded-xl transition cursor-pointer"
+                  className="bg-accent-600 hover:bg-accent-500 text-white text-sm font-semibold py-2.5 px-6 rounded-xl transition cursor-pointer"
                 >
                   Try again
                 </button>

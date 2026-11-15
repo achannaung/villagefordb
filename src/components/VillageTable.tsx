@@ -117,8 +117,8 @@ export default function VillageTable({
       return <ArrowUpDown size={14} className="sort-indicator text-slate-400 hover:text-slate-300 transition-colors" />;
     }
     return sortDirection === 'asc' 
-      ? <ArrowUp size={14} className="sort-indicator text-indigo-400" />
-      : <ArrowDown size={14} className="sort-indicator text-indigo-400" />;
+      ? <ArrowUp size={14} className="sort-indicator text-accent-400" />
+      : <ArrowDown size={14} className="sort-indicator text-accent-400" />;
   };
 
   const sortedVillages = useMemo(() => {
@@ -259,14 +259,14 @@ export default function VillageTable({
             aria-pressed={groupByTract}
             className={`flex-1 sm:flex-none border font-medium py-2 px-4 rounded-xl text-sm transition duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none ${
               groupByTract
-                ? 'border-indigo-500 bg-indigo-500/15 text-white'
-                : 'border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/10 text-slate-300 hover:text-white'
+                ? 'border-accent-500 bg-accent-500/15 text-white'
+                : 'border-slate-700 hover:border-accent-500 hover:bg-accent-500/10 text-slate-300 hover:text-white'
             }`}
             title="Group villages by village tract"
           >
             <Layers size={16} />
             <span>Group by Tract</span>
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${groupByTract ? 'bg-indigo-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${groupByTract ? 'bg-accent-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
               {groupByTract ? 'ON' : 'OFF'}
             </span>
           </button>
@@ -275,14 +275,14 @@ export default function VillageTable({
             <div className="flex items-center gap-2 text-xs">
               <button
                 onClick={() => setCollapsedTracts(new Set())}
-                className="text-indigo-300 hover:text-white transition cursor-pointer"
+                className="text-accent-300 hover:text-white transition cursor-pointer"
               >
                 Expand all
               </button>
               <span className="text-slate-600">|</span>
               <button
                 onClick={() => setCollapsedTracts(new Set(tractCounts.keys()))}
-                className="text-indigo-300 hover:text-white transition cursor-pointer"
+                className="text-accent-300 hover:text-white transition cursor-pointer"
               >
                 Collapse all
               </button>
@@ -292,7 +292,7 @@ export default function VillageTable({
           <button
             onClick={onCopyAllPCodes}
             disabled={villages.length === 0}
-            className="flex-1 sm:flex-none border border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/10 disabled:opacity-50 disabled:pointer-events-none text-slate-300 hover:text-white font-medium py-2 px-4 rounded-xl text-sm transition duration-150 flex items-center justify-center gap-2 cursor-pointer"
+            className="flex-1 sm:flex-none border border-slate-700 hover:border-accent-500 hover:bg-accent-500/10 disabled:opacity-50 disabled:pointer-events-none text-slate-300 hover:text-white font-medium py-2 px-4 rounded-xl text-sm transition duration-150 flex items-center justify-center gap-2 cursor-pointer"
             title="Copy all matching MIMU P-Codes to clipboard"
           >
             {pcodeCopied ? (
@@ -311,7 +311,7 @@ export default function VillageTable({
           <button
             onClick={onExportCSV}
             disabled={villages.length === 0}
-            className="flex-1 sm:flex-none bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 hover:border-indigo-500 text-indigo-300 hover:text-white font-medium py-2 px-4 rounded-xl text-sm transition duration-150 flex items-center justify-center gap-2 cursor-pointer"
+            className="flex-1 sm:flex-none bg-accent-600/20 hover:bg-accent-600/30 border border-accent-500/30 hover:border-accent-500 text-accent-300 hover:text-white font-medium py-2 px-4 rounded-xl text-sm transition duration-150 flex items-center justify-center gap-2 cursor-pointer"
             title="Export current selection to CSV"
           >
             <FileSpreadsheet size={16} />
@@ -396,19 +396,19 @@ export default function VillageTable({
                     <tr
                       key={`tract-${row.tract}`}
                       onClick={() => toggleTract(row.tract)}
-                      className="bg-indigo-950/40 hover:bg-indigo-950/60 cursor-pointer transition"
+                      className="bg-accent-950/40 hover:bg-accent-950/60 cursor-pointer transition"
                       title={row.collapsed ? 'Expand tract' : 'Collapse tract'}
                     >
                       <td colSpan={7} className="px-3 py-2 sm:px-6 sm:py-2.5">
                         <div className="flex items-center gap-2 text-xs sm:text-sm">
                           {row.collapsed ? (
-                            <ChevronRight size={14} className="text-indigo-300 shrink-0" />
+                            <ChevronRight size={14} className="text-accent-300 shrink-0" />
                           ) : (
-                            <ChevronDown size={14} className="text-indigo-300 shrink-0" />
+                            <ChevronDown size={14} className="text-accent-300 shrink-0" />
                           )}
-                          <span className="font-semibold text-indigo-200">{row.tract}</span>
+                          <span className="font-semibold text-accent-200">{row.tract}</span>
                           {row.continued && <span className="text-[11px] text-slate-400">(continued)</span>}
-                          <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">
+                          <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-accent-500/15 text-accent-300 border border-accent-500/20">
                             {row.count} {row.count === 1 ? 'village' : 'villages'}
                           </span>
                         </div>
@@ -451,8 +451,8 @@ export default function VillageTable({
                     onClick={(e) => handleCopyName(e, village.id, village.nameEn)}
                     title="Click to copy English name"
                   >
-                    <div className="flex items-center gap-1.5 hover:text-indigo-300 transition-colors">
-                      <span className="font-medium underline decoration-dotted decoration-slate-600 group-hover/copy:decoration-indigo-400">
+                    <div className="flex items-center gap-1.5 hover:text-accent-300 transition-colors">
+                      <span className="font-medium underline decoration-dotted decoration-slate-600 group-hover/copy:decoration-accent-400">
                         {village.nameEn}
                       </span>
                       {copiedVillageId === village.id ? (
@@ -469,8 +469,8 @@ export default function VillageTable({
                     onClick={(e) => handleCopyName(e, village.id, village.nameMm)}
                     title={village.nameMm === '—' ? 'No Burmese name' : 'Click to copy Burmese name'}
                   >
-                    <div className="flex items-center gap-1.5 hover:text-indigo-300 transition-colors">
-                      <span className="underline decoration-dotted decoration-slate-600 group-hover/copy:decoration-indigo-400">
+                    <div className="flex items-center gap-1.5 hover:text-accent-300 transition-colors">
+                      <span className="underline decoration-dotted decoration-slate-600 group-hover/copy:decoration-accent-400">
                         {village.nameMm}
                       </span>
                       {village.nameMm !== '—' &&
@@ -495,7 +495,7 @@ export default function VillageTable({
                     {village.latitude === 0 && village.longitude === 0 ? (
                       <span className="text-slate-500">—</span>
                     ) : (
-                      <span className="underline decoration-dotted decoration-slate-600 hover:text-indigo-300 transition-colors cursor-pointer">
+                      <span className="underline decoration-dotted decoration-slate-600 hover:text-accent-300 transition-colors cursor-pointer">
                         {village.latitude.toFixed(4)}, {village.longitude.toFixed(4)}
                       </span>
                     )}
@@ -509,7 +509,7 @@ export default function VillageTable({
                         e.stopPropagation();
                         onSelectVillage(village);
                       }}
-                      className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 hover:text-white transition group-hover:scale-105 cursor-pointer"
+                      className="p-1.5 rounded-lg bg-accent-500/10 text-accent-300 hover:bg-accent-500/20 hover:text-white transition group-hover:scale-105 cursor-pointer"
                       title="View full monitoring records"
                     >
                       <Eye size={16} />
@@ -534,7 +534,7 @@ export default function VillageTable({
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white focus:outline-none focus:border-indigo-500"
+              className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white focus:outline-none focus:border-accent-500"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -571,7 +571,7 @@ export default function VillageTable({
                   onClick={() => handlePageChange(Number(page))}
                   className={`w-8 h-8 rounded-lg text-xs font-semibold transition cursor-pointer ${
                     currentPage === page
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                      ? 'bg-accent-600 text-white shadow-lg shadow-accent-600/30'
                       : 'border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
                   }`}
                 >

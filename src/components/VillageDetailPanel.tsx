@@ -83,7 +83,7 @@ Source: ${village.source}`;
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
+            <div className="p-2 bg-accent-500/20 rounded-lg text-accent-400">
               <Activity size={20} />
             </div>
             <div>
@@ -122,7 +122,7 @@ Source: ${village.source}`;
             <div className="bg-slate-900/20 border border-slate-800/80 rounded-xl p-3.5">
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">GAD P-Code</span>
               <div className="flex items-center justify-between">
-                <span className="font-mono text-sm text-indigo-300 font-bold">{village.pcode}</span>
+                <span className="font-mono text-sm text-accent-300 font-bold">{village.pcode}</span>
                 <button
                   onClick={copyPCode}
                   className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer"
@@ -143,7 +143,7 @@ Source: ${village.source}`;
           <div className="bg-slate-900/20 border border-slate-800/80 rounded-xl p-3.5">
             <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Village Tract</span>
             <div className="flex items-center gap-1.5 text-sm text-slate-200 font-medium">
-              <MapPin size={14} className="text-indigo-400 shrink-0" />
+              <MapPin size={14} className="text-accent-400 shrink-0" />
               <span className="truncate">{village.tractEn}</span>
             </div>
           </div>
@@ -174,7 +174,7 @@ Source: ${village.source}`;
               href={`https://www.google.com/maps/search/?api=1&query=${village.latitude},${village.longitude}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer"
+              className="flex-1 bg-accent-600 hover:bg-accent-500 text-white py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer"
             >
               <ExternalLink size={14} />
               <span>Open in Google Maps</span>
@@ -184,7 +184,7 @@ Source: ${village.source}`;
           {/* Field Notes Form */}
           <form onSubmit={handleSaveNote} className="space-y-3">
             <label htmlFor="observations-note" className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-              <FileText size={12} className="text-indigo-400" />
+              <FileText size={12} className="text-accent-400" />
               <span>Field Notes</span>
             </label>
             <textarea
@@ -198,7 +198,7 @@ Source: ${village.source}`;
             <div className="flex items-center justify-end">
               <button
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/20"
+                className="bg-accent-600 hover:bg-accent-500 active:bg-accent-700 text-white text-xs font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center gap-1.5 cursor-pointer shadow-md shadow-accent-600/20"
               >
                 {noteSaved ? (
                   <>

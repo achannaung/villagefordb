@@ -155,7 +155,7 @@ export default function AutocompleteInput({
                 onMouseEnter={() => setActive(i)}
                 className={`w-full flex items-center justify-between gap-2 px-4 py-2 text-sm transition cursor-pointer ${
                   active === i
-                    ? 'bg-indigo-600/25 text-white'
+                    ? 'bg-accent-600/25 text-white'
                     : 'text-slate-300 hover:bg-slate-800/70'
                 }`}
               >

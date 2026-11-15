@@ -5,6 +5,30 @@
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Brand accent — burnt orange sampled from the BioForge reference
+     (primary button #E87030) */
+  --color-accent-200: #f9cdb2;
+  --color-accent-300: #f5a97f;
+  --color-accent-400: #f08a4b;
+  --color-accent-500: #e87030;
+  --color-accent-600: #d2601f;
+  --color-accent-700: #b04e18;
+  --color-accent-950: #2b1a10;
+
+  /* Slate scale re-based to the reference's desaturated teal-grey
+     (page bg #262E32 → #3D4A4F, panels #4E6166, frosted #7E9498) */
+  --color-slate-50: #f7fafa;
+  --color-slate-100: #edf2f3;
+  --color-slate-200: #d8e2e4;
+  --color-slate-300: #b9c9cc;
+  --color-slate-400: #9db2b7;
+  --color-slate-500: #71848b;
+  --color-slate-600: #5a6b72;
+  --color-slate-700: #46545b;
+  --color-slate-800: #36434a;
+  --color-slate-900: #262e32;
+  --color-slate-950: #1e262a;
 }
 
 /* Single dark theme — professional GIS console look */
@@ -14,24 +38,24 @@
 
 body {
   font-family: var(--font-sans);
-  background: #0b0f19; /* Deep Professional Slate */
+  background: #262e32; /* Reference dark teal-grey */
   background-image:
-    radial-gradient(at 0% 0%, rgba(15, 23, 42, 0.9) 0, transparent 40%),
-    radial-gradient(at 50% 0%, rgba(30, 41, 59, 0.5) 0, transparent 55%),
-    radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.9) 0, transparent 40%);
+    radial-gradient(at 0% 0%, rgba(30, 38, 42, 0.9) 0, transparent 40%),
+    radial-gradient(at 50% 0%, rgba(78, 97, 102, 0.45) 0, transparent 55%),
+    radial-gradient(at 100% 0%, rgba(61, 74, 79, 0.8) 0, transparent 45%);
   min-height: 100vh;
-  color: #f1f5f9;
+  color: #edf2f3;
   overflow-x: hidden;
 }
 
 ::selection {
-  background: rgba(37, 99, 235, 0.4);
+  background: rgba(232, 112, 48, 0.45);
   color: #fff;
 }
 
 /* Visible keyboard focus for accessibility */
 :focus-visible {
-  outline: 2px solid #818cf8;
+  outline: 2px solid #f08a4b;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -42,15 +66,15 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.3);
+  background: rgba(30, 38, 42, 0.3);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(157, 178, 183, 0.25);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(157, 178, 183, 0.45);
 }
 
 /* Style for sticky table header */
@@ -62,44 +86,44 @@ thead th {
 
 /* Style for dropdown options */
 select option {
-  background: #0f172a;
-  color: #f1f5f9;
+  background: #262e32;
+  color: #edf2f3;
 }
 
-/* Glassmorphism utility classes - Clean Slate versions */
+/* Glassmorphism utility classes - teal-grey versions */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(38, 46, 50, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.4);
+  background: rgba(61, 74, 79, 0.45);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   transition: all 0.3s ease;
 }
 
 .glass-card:hover {
-  background: rgba(30, 41, 59, 0.65);
-  border-color: rgba(59, 130, 246, 0.3);
-  box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.15);
+  background: rgba(61, 74, 79, 0.65);
+  border-color: rgba(232, 112, 48, 0.35);
+  box-shadow: 0 10px 30px -10px rgba(232, 112, 48, 0.18);
 }
 
 .glass-input {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(30, 38, 42, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #f8fafc;
+  color: #f7fafa;
   transition: all 0.2s ease;
 }
 
 .glass-input:focus {
-  background: rgba(15, 23, 42, 0.8);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(30, 38, 42, 0.85);
+  border-color: rgba(232, 112, 48, 0.55);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 2px rgba(232, 112, 48, 0.18);
 }
 
 /* Additional layout styling */
@@ -117,53 +141,9 @@ select option {
   z-index: 10;
 }
 
-/* Global brand mappings from indigo to elegant corporate blue */
-.text-indigo-400 {
-  color: #3b82f6 !important; /* Elegant corporate blue */
-}
-
-.text-indigo-300 {
-  color: #60a5fa !important; /* Elegant lighter blue */
-}
-
-.bg-indigo-600 {
-  background-color: #2563eb !important; /* Professional royal blue */
-}
-
-.bg-indigo-500\/10 {
-  background-color: rgba(37, 99, 235, 0.1) !important;
-}
-
-.bg-indigo-500\/20 {
-  background-color: rgba(37, 99, 235, 0.18) !important;
-}
-
-.border-indigo-500\/20 {
-  border-color: rgba(37, 99, 235, 0.2) !important;
-}
-
-.border-indigo-500\/40 {
-  border-color: rgba(37, 99, 235, 0.35) !important;
-}
-
-.border-indigo-500\/30 {
-  border-color: rgba(37, 99, 235, 0.25) !important;
-}
-
-.shadow-indigo-600\/30 {
-  --tw-shadow-color: rgba(37, 99, 235, 0.2) !important;
-}
-
-.shadow-indigo-600\/20 {
-  --tw-shadow-color: rgba(37, 99, 235, 0.15) !important;
-}
-
-.from-indigo-500 {
-  --tw-gradient-from: #2563eb !important;
-  --tw-gradient-to: rgba(37, 99, 235, 0) !important;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
-}
-
+/* Brand colors are token-driven: components use the `accent` palette
+   (burnt orange) and the re-based `slate` palette (teal-grey), both
+   defined in @theme above. No per-class overrides needed. */
 
 /* Custom map/radar animation classes */
 .animate-fade-in {
@@ -210,26 +190,26 @@ select option {
 /* Leaflet HUD Custom Styling */
 .leaflet-container {
   font-family: inherit !important;
-  background-color: #020617 !important; /* slate-950 */
+  background-color: #1e262a !important; /* slate-950 */
 }
 
 /* Custom Scale Control styling to match the dark theme */
 .leaflet-control-scale {
-  background: rgba(15, 23, 42, 0.85) !important; /* slate-900 with opacity */
-  border: 1px solid rgba(51, 65, 85, 0.5) !important; /* slate-700 */
+  background: rgba(38, 46, 50, 0.85) !important; /* slate-900 with opacity */
+  border: 1px solid rgba(70, 84, 91, 0.5) !important; /* slate-700 */
   border-top: none !important;
   padding: 2px 5px !important;
   border-radius: 0 0 4px 4px !important;
-  color: #94a3b8 !important; /* slate-400 */
+  color: #9db2b7 !important; /* slate-400 */
   font-size: 9px !important;
   font-family: monospace !important;
 }
 
 .leaflet-control-scale-line {
-  background: rgba(15, 23, 42, 0.85) !important;
-  border: 1px solid rgba(148, 163, 184, 0.4) !important;
+  background: rgba(38, 46, 50, 0.85) !important;
+  border: 1px solid rgba(157, 178, 183, 0.4) !important;
   border-top: none !important;
-  color: #e2e8f0 !important;
+  color: #d8e2e4 !important;
 }
 
 .custom-leaflet-marker {

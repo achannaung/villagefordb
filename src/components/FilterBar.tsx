@@ -56,10 +56,10 @@ export default function FilterBar({
   return (
     <div id="filter-card" className="glass-panel rounded-2xl p-6 shadow-2xl mb-8 relative overflow-hidden">
       {/* Absolute accent element */}
-      <div className="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
+      <div className="absolute top-0 left-0 w-2 h-full bg-accent-500"></div>
 
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-300">
+        <div className="p-2 bg-accent-500/20 rounded-lg text-accent-300">
           <SlidersHorizontal size={20} id="filter-icon" />
         </div>
         <div>
@@ -76,7 +76,7 @@ export default function FilterBar({
             {selectedState && (
               <button 
                 onClick={() => setSelectedState('')} 
-                className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5"
+                className="text-xs text-accent-400 hover:text-accent-300 flex items-center gap-0.5"
               >
                 Clear
               </button>
@@ -158,11 +158,11 @@ export default function FilterBar({
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-sm text-slate-400 flex items-center gap-2">
-          <Database size={16} className="text-indigo-400" />
+          <Database size={16} className="text-accent-400" />
           <span>
             {hasSearched ? (
               <>
-                Found <strong className="text-indigo-300 text-base">{filteredCount.toLocaleString()}</strong> {filteredCount === 1 ? 'village' : 'villages'}
+                Found <strong className="text-accent-300 text-base">{filteredCount.toLocaleString()}</strong> {filteredCount === 1 ? 'village' : 'villages'}
               </>
             ) : (
               <>
@@ -187,7 +187,7 @@ export default function FilterBar({
             id="search-btn"
             type="button"
             onClick={onSearch}
-            className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 active:scale-95 hover:scale-[1.02] text-white font-medium py-3 px-8 rounded-xl transition duration-150 ease-out shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/40 flex items-center justify-center gap-2 cursor-pointer"
+            className="flex-1 sm:flex-none bg-accent-600 hover:bg-accent-500 active:bg-accent-700 active:scale-95 hover:scale-[1.02] text-white font-medium py-3 px-8 rounded-xl transition duration-150 ease-out shadow-lg shadow-accent-600/30 hover:shadow-accent-500/40 flex items-center justify-center gap-2 cursor-pointer"
           >
             <Search size={18} />
             <span>Search</span>

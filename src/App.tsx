@@ -325,13 +325,13 @@ export default function App() {
       <div className="max-w-7xl mx-auto space-y-8">
         <header id="header-section" className="text-center space-y-3 py-6 relative">
           <div className="mx-auto w-16 h-16 bg-white/5 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center mb-2 shadow-2xl">
-            <Database className="text-indigo-400" size={32} />
+            <Database className="text-accent-400" size={32} />
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white font-display tracking-tight drop-shadow-lg">Village Finder</h1>
           <p className="text-sm md:text-base text-slate-300 font-sans uppercase tracking-[0.2em] font-semibold max-w-md mx-auto">
-            GAD Coordinate Database • <span className="text-indigo-300 font-extrabold">ACA</span>
+            GAD Coordinate Database • <span className="text-accent-300 font-extrabold">ACA</span>
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent mx-auto mt-4 rounded-full"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-accent-500 to-transparent mx-auto mt-4 rounded-full"></div>
         </header>
 
         <div id="registry-status-banner" className="w-full">
@@ -358,15 +358,15 @@ export default function App() {
               <div className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">{allVillages.length.toLocaleString()} in memory</div>
             </div>
           ) : (
-            <div className="glass-panel border-indigo-500/30 bg-indigo-500/5 text-indigo-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl border">
+            <div className="glass-panel border-accent-500/30 bg-accent-500/5 text-accent-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl border">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><Database size={18} /></div>
+                <div className="p-2 bg-accent-500/20 rounded-lg text-accent-400"><Database size={18} /></div>
                 <div>
                   <div className="text-sm font-semibold">Instant-ready — {totalRecords.toLocaleString()} records indexed</div>
-                  <div className="text-xs text-indigo-300/70 mt-0.5">Search loads only the matching state file. No more 8.5MB wait on page open.</div>
+                  <div className="text-xs text-accent-300/70 mt-0.5">Search loads only the matching state file. No more 8.5MB wait on page open.</div>
                 </div>
               </div>
-              <div className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded bg-indigo-500/10 border border-indigo-500/20">~20KB initial load</div>
+              <div className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded bg-accent-500/10 border border-accent-500/20">~20KB initial load</div>
             </div>
           )}
 
@@ -409,8 +409,8 @@ export default function App() {
         {isLoading ? (
           <div id="loading-indicator" className="glass-panel rounded-2xl p-16 text-center shadow-2xl border border-slate-800 flex flex-col items-center justify-center gap-4">
             <div className="relative flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full border-4 border-indigo-500/20 border-t-indigo-400 animate-spin"></div>
-              <Database size={24} className="absolute text-indigo-400 animate-bounce" />
+              <div className="w-16 h-16 rounded-full border-4 border-accent-500/20 border-t-accent-400 animate-spin"></div>
+              <Database size={24} className="absolute text-accent-400 animate-bounce" />
             </div>
             <div>
               <h4 className="text-lg font-bold text-white font-display">{loadProgress || 'Searching…'}</h4>
@@ -419,20 +419,20 @@ export default function App() {
           </div>
         ) : !hasSearched ? (
           <div id="search-placeholder" className="glass-panel rounded-2xl p-12 sm:p-16 text-center shadow-2xl border border-slate-800 flex flex-col items-center justify-center gap-6">
-            <div className="p-4 bg-indigo-500/10 rounded-full text-indigo-400 border border-indigo-500/20 shadow-inner animate-bounce"><Search size={36} /></div>
+            <div className="p-4 bg-accent-500/10 rounded-full text-accent-400 border border-accent-500/20 shadow-inner animate-bounce"><Search size={36} /></div>
             <div className="max-w-md mx-auto space-y-2">
               <h4 className="text-xl font-bold text-white font-display">GAD Village Search</h4>
-              <p className="text-sm text-slate-400 leading-relaxed">Select a State/Region or enter a Township/Village name and click <strong className="text-indigo-400 font-semibold">Search</strong>.</p>
+              <p className="text-sm text-slate-400 leading-relaxed">Select a State/Region or enter a Township/Village name and click <strong className="text-accent-400 font-semibold">Search</strong>.</p>
             </div>
             <div className="flex flex-col items-center gap-3 max-w-lg">
               <span className="text-xs text-slate-400 font-medium select-none">Or click a shortcut:</span>
               <div className="flex flex-wrap justify-center gap-2">
                 {['Ayeyarwady Region', 'Shan State'].map((s) => (
                   <button key={s} onClick={() => { setSelectedState(s); setTownshipQuery(''); setVillageQuery(''); setVillageEnQuery(''); runSearch(s, '', '', ''); }}
-                    className="px-3.5 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-xs text-slate-300 border border-slate-800 hover:border-indigo-500/40 hover:text-indigo-300 transition cursor-pointer">{s}</button>
+                    className="px-3.5 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-xs text-slate-300 border border-slate-800 hover:border-accent-500/40 hover:text-accent-300 transition cursor-pointer">{s}</button>
                 ))}
                 <button onClick={() => { setTownshipQuery('Bogale'); setSelectedState('Ayeyarwady Region'); setVillageQuery(''); setVillageEnQuery(''); runSearch('Ayeyarwady Region', 'Bogale', '', ''); }}
-                  className="px-3.5 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-xs text-slate-300 border border-slate-800 hover:border-indigo-500/40 hover:text-indigo-300 transition cursor-pointer">Bogale Township</button>
+                  className="px-3.5 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-xs text-slate-300 border border-slate-800 hover:border-accent-500/40 hover:text-accent-300 transition cursor-pointer">Bogale Township</button>
               </div>
             </div>
             {recentSearches.length > 0 && (
@@ -441,7 +441,7 @@ export default function App() {
                 <div className="flex flex-wrap justify-center gap-2">
                   {recentSearches.map((r, i) => (
                     <button key={i} onClick={() => applyRecent(r)} title={describeRecent(r)}
-                      className="max-w-[220px] truncate px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-xs text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/40 transition cursor-pointer">
+                      className="max-w-[220px] truncate px-3.5 py-2 rounded-xl bg-accent-500/10 hover:bg-accent-500/20 text-xs text-accent-300 border border-accent-500/20 hover:border-accent-500/40 transition cursor-pointer">
                       {formatRecent(r)}
                     </button>
                   ))}
@@ -482,17 +482,17 @@ export default function App() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
           <div id="about-card" className="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
-            <h3 className="text-xl font-bold text-white font-display mb-4 flex items-center gap-2"><CheckCircle2 size={18} className="text-indigo-400" /><span>About This Tool</span></h3>
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-accent-500"></div>
+            <h3 className="text-xl font-bold text-white font-display mb-4 flex items-center gap-2"><CheckCircle2 size={18} className="text-accent-400" /><span>About This Tool</span></h3>
             <div className="space-y-4 text-slate-300 text-sm leading-relaxed">
-              <p className="flex gap-3"><span className="text-indigo-400 font-bold text-lg select-none">♦</span><span>Search {totalRecords.toLocaleString()} villages with precise GAD coordinates across Myanmar.</span></p>
-              <p className="flex gap-3"><span className="text-indigo-400 font-bold text-lg select-none">♦</span><span>Data is split by state for instant loading, with real P-Codes, tracts, districts and sources.</span></p>
+              <p className="flex gap-3"><span className="text-accent-400 font-bold text-lg select-none">♦</span><span>Search {totalRecords.toLocaleString()} villages with precise GAD coordinates across Myanmar.</span></p>
+              <p className="flex gap-3"><span className="text-accent-400 font-bold text-lg select-none">♦</span><span>Data is split by state for instant loading, with real P-Codes, tracts, districts and sources.</span></p>
             </div>
-            <div className="mt-6"><span className="inline-flex items-center gap-1.5 text-xs bg-indigo-500/10 text-indigo-300 font-semibold py-1.5 px-3 rounded-lg border border-indigo-500/20"><Database size={12} /><span>Data Source: GAD Coordinate Database • {totalRecords.toLocaleString()} records • Jul 2026</span></span></div>
+            <div className="mt-6"><span className="inline-flex items-center gap-1.5 text-xs bg-accent-500/10 text-accent-300 font-semibold py-1.5 px-3 rounded-lg border border-accent-500/20"><Database size={12} /><span>Data Source: GAD Coordinate Database • {totalRecords.toLocaleString()} records • Jul 2026</span></span></div>
           </div>
           <div id="features-card" className="glass-panel rounded-2xl p-6 shadow-xl border border-slate-800 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
-            <h3 className="text-xl font-bold text-white font-display mb-4 flex items-center gap-2"><SlidersHorizontal size={18} className="text-indigo-400" /><span>Key Features</span></h3>
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-accent-500"></div>
+            <h3 className="text-xl font-bold text-white font-display mb-4 flex items-center gap-2"><SlidersHorizontal size={18} className="text-accent-400" /><span>Key Features</span></h3>
             <ul className="space-y-3 text-slate-300 text-sm">
               <li className="flex items-start gap-3"><span className="text-emerald-400 font-bold mt-0.5 select-none">✔</span><div><strong className="text-white">Instant State-split Loading:</strong><p className="text-xs text-slate-400 mt-0.5">Only matching state files load. No full 8.5MB download on open.</p></div></li>
               <li className="flex items-start gap-3"><span className="text-emerald-400 font-bold mt-0.5 select-none">✔</span><div><strong className="text-white">Autocomplete + Recent:</strong><p className="text-xs text-slate-400 mt-0.5">Type-ahead suggestions and one-click repeat searches.</p></div></li>
@@ -520,7 +520,7 @@ export default function App() {
               fallback={
                 <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/70 backdrop-blur-sm">
                   <div className="relative w-full max-w-lg h-full glass-panel border-l border-slate-800 shadow-2xl flex flex-col items-center justify-center gap-3 z-10">
-                    <div className="w-10 h-10 rounded-full border-4 border-indigo-500/20 border-t-indigo-400 animate-spin"></div>
+                    <div className="w-10 h-10 rounded-full border-4 border-accent-500/20 border-t-accent-400 animate-spin"></div>
                     <span className="text-xs text-slate-400 font-medium">Opening details…</span>
                   </div>
                 </div>

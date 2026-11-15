@@ -197,9 +197,9 @@ export default function LocationMap({
     } else {
       const markerHtml = `
         <div class="relative flex items-center justify-center">
-          <div class="absolute w-8 h-8 bg-indigo-500/40 rounded-full animate-ping"></div>
+          <div class="absolute w-8 h-8 bg-accent-500/40 rounded-full animate-ping"></div>
           <div class="absolute w-5 h-5 bg-cyan-500/20 rounded-full"></div>
-          <div class="relative w-3.5 h-3.5 bg-indigo-600 rounded-full border border-white shadow-lg flex items-center justify-center">
+          <div class="relative w-3.5 h-3.5 bg-accent-600 rounded-full border border-white shadow-lg flex items-center justify-center">
             <div class="w-1 h-1 bg-white rounded-full"></div>
           </div>
         </div>
@@ -241,7 +241,7 @@ export default function LocationMap({
       {/* Header Panel */}
       <div className="p-4 border-b border-slate-800/60 flex items-center justify-between bg-slate-950/40">
         <div className="flex items-center gap-2">
-          <Compass size={16} className="text-indigo-400 animate-spin-slow" />
+          <Compass size={16} className="text-accent-400 animate-spin-slow" />
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
             Interactive GIS Map
           </span>
@@ -269,7 +269,7 @@ export default function LocationMap({
             target="_blank"
             referrerPolicy="no-referrer"
             rel="noopener noreferrer"
-            className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5 font-medium transition"
+            className="text-xs text-accent-400 hover:text-accent-300 flex items-center gap-0.5 font-medium transition"
           >
             <span>Open Maps</span>
             <Navigation size={10} className="transform rotate-45" />
@@ -282,7 +282,7 @@ export default function LocationMap({
         <div className="space-y-1 bg-slate-950/40 border border-slate-900 rounded-xl p-3">
           <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Latitude (Y)</span>
           <div className="text-sm font-extrabold text-white font-mono tracking-tight">{dispLat}°</div>
-          <div className="text-[11px] text-indigo-300 font-mono">{dmsLat}</div>
+          <div className="text-[11px] text-accent-300 font-mono">{dmsLat}</div>
         </div>
         <div className="space-y-1 bg-slate-950/40 border border-slate-900 rounded-xl p-3">
           <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Longitude (X)</span>
@@ -301,7 +301,7 @@ export default function LocationMap({
         {mapLoading && !tilesFailed && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 pointer-events-none" style={{ zIndex: 500 }}>
             <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full border-4 border-indigo-500/20 border-t-indigo-400 animate-spin"></div>
+              <div className="w-10 h-10 rounded-full border-4 border-accent-500/20 border-t-accent-400 animate-spin"></div>
               <span className="text-[11px] text-slate-300 font-medium">Loading map…</span>
             </div>
           </div>
@@ -330,7 +330,7 @@ export default function LocationMap({
           {/* Recenter */}
           <button
             onClick={handleRecenter}
-            className="w-8 h-8 rounded-lg bg-indigo-600/90 border border-indigo-500/40 text-white hover:bg-indigo-500 transition flex items-center justify-center shadow-lg cursor-pointer"
+            className="w-8 h-8 rounded-lg bg-accent-600/90 border border-accent-500/40 text-white hover:bg-accent-500 transition flex items-center justify-center shadow-lg cursor-pointer"
             title="Recenter Map"
           >
             <Maximize2 size={13} />
@@ -341,7 +341,7 @@ export default function LocationMap({
             onClick={handleToggleStyle}
             className={`w-8 h-8 rounded-lg border text-slate-300 hover:text-white transition flex items-center justify-center shadow-lg cursor-pointer ${
               mapStyle === 'sat'
-                ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300'
+                ? 'bg-accent-500/20 border-accent-500/40 text-accent-300'
                 : 'bg-slate-950/90 border-slate-800'
             }`}
             title={`Switch to ${nextStyleLabel} (now: ${STYLE_LABEL[mapStyle]})`}
@@ -354,7 +354,7 @@ export default function LocationMap({
         <div className="absolute bottom-3 right-3 z-10 bg-slate-950/90 border border-slate-800/80 text-[10px] px-2.5 py-1 rounded-lg shadow-xl flex items-center gap-1.5 backdrop-blur-sm pointer-events-none" style={{ zIndex: 1000 }}>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold text-slate-200">{villageName}</span>
-          <span className="text-indigo-300 font-semibold">{STYLE_LABEL[mapStyle]}</span>
+          <span className="text-accent-300 font-semibold">{STYLE_LABEL[mapStyle]}</span>
           <span className="text-slate-400 font-mono">Zoom: {mapZoom}</span>
         </div>
 
@@ -374,7 +374,7 @@ export default function LocationMap({
           <Globe size={11} className="text-slate-600" />
           <span>Regional Context: {townshipEn} • {stateEn}</span>
         </span>
-        <span className="font-mono text-indigo-400/80">{STYLE_ATTR[mapStyle]}</span>
+        <span className="font-mono text-accent-400/80">{STYLE_ATTR[mapStyle]}</span>
       </div>
     </div>
   );
