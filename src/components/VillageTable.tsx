@@ -79,8 +79,10 @@ export default function VillageTable({
 
   useEffect(() => {
     setCollapsedTracts(new Set());
-    if (!groupTouched) setGroupByTract(isSingleTownship && villages.length > 50);
-  }, [villages, isSingleTownship, groupTouched]);
+    // Group by Tract stays OFF by default (AChan, 2026-11-15) — the user can
+    // still switch it on manually with the toggle.
+    if (!groupTouched) setGroupByTract(false);
+  }, [villages, groupTouched]);
 
   // Village count per tract across the whole filtered set (for group headers)
   const tractCounts = useMemo(() => {

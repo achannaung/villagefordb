@@ -354,7 +354,7 @@ export default function App() {
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white font-display tracking-tight drop-shadow-lg">Village Finder</h1>
           <p className="text-sm md:text-base text-slate-300 font-sans uppercase tracking-[0.2em] font-semibold max-w-md mx-auto">
-            GAD Coordinate Database • <span className="text-accent-300 font-extrabold">ACA</span>
+            Developed by <span className="text-accent-300 font-extrabold">ACA</span>
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-transparent via-accent-500 to-transparent mx-auto mt-4 rounded-full"></div>
         </header>
